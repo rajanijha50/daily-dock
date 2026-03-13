@@ -10,7 +10,8 @@ export type UserType = {
 
 export interface NoteType {
     user_email: string;
-    content: string;
+    title?: string;
+    content?: string;
     category?: string;
     createdAt: Date;
     modifiedAt: Date;
@@ -29,7 +30,7 @@ export interface TodoType {
     user_email: string;
     content: string;
     category?: string;
-    isCompleted: boolean;
+    status: "not-started" | "in-progress" | "completed";
     createdAt: Date;
     modifiedAt: Date;
 }

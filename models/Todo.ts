@@ -3,36 +3,33 @@ import mongoose, { Model } from "mongoose";
 
 
 const TodoSchema = new mongoose.Schema<TodoType>({
-    // user_id: {
-    //     type: mongoose.Schema.Types.ObjectId,  // Fixed: use Types.ObjectId
-    //     ref: "UserModel",
-    //     required: true,
-    // },
     user_email: {
         type: String,
         required: true
     },
     content: {
-        type: String,  // Added: specify the type
-        required: true,
+        type: String,
+        required: false,
     },
-    isCompleted: {
-        type: Boolean,  // Better to be explicit
-        default: false  // Optional: add a default value
+    status: {
+        type: String,
+        required: true,
+        default: "not-started"
     },
     category: {
-        type: String
+        type: String,
+        required: false,
     },
     createdAt: {
-        type: Date,  // Added: specify the type
+        type: Date,
         default: Date.now
     },
     modifiedAt: {
-        type: Date,  // Added: specify the type
+        type: Date,
         default: Date.now
     }
 });
 
-const TodoModel: Model<TodoType> = mongoose.models.TodoModel || mongoose.model<TodoType>('todos',TodoSchema);
+const TodoModel: Model<TodoType> = mongoose.models.todos || mongoose.model<TodoType>('todos',TodoSchema);
 
 export default TodoModel;

@@ -7,9 +7,13 @@ const NoteSchema = new mongoose.Schema<NoteType>({
         type: String,
         required: true
     },
+    title: {
+        type: String,
+        required: false,
+    },
     content: {
         type: String,
-        required: true
+        required: false
     },
     category: {
         type: String,
@@ -25,6 +29,6 @@ const NoteSchema = new mongoose.Schema<NoteType>({
     }
 });
 
-const NoteModel: Model<NoteType> = mongoose.models.NoteModel || mongoose.model<NoteType>('notes',NoteSchema);
+const NoteModel: Model<NoteType> = mongoose.models.notes || mongoose.model<NoteType>('notes',NoteSchema);
 
 export default NoteModel;

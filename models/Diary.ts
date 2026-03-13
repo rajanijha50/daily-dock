@@ -25,6 +25,6 @@ const DiarySchema = new mongoose.Schema<DiaryType>({
     }
 });
 
-const DiaryModel: Model<DiaryType> = mongoose.models.DiaryModel || mongoose.model<DiaryType>('diaries',DiarySchema);
+const DiaryModel: Model<DiaryType> = mongoose.models.diaries || mongoose.model<DiaryType>('diaries',DiarySchema);
 
 export default DiaryModel;
