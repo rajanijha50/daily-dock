@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 }
 export async function POST(request: NextRequest) {
     const todo = await request.json()
-    if (!todo.content || !todo.user_email) {
+    if (!todo.user_email) {
         return NextResponse.json({ message: "required fields are missing" })
     }
 
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
         const newTodo = new TodoModel({
             // user_id: todo.user_id, //we'll be using email to mapping between user and his TODO not userID
             user_email: todo.user_email,
-            content: todo.content,
-            isCompleted: todo.isCompleted || false,
+            content: todo?.content,
+            status: todo?.status,
         })
 
         await newTodo.save()
@@ -68,7 +68,7 @@ export async function PUT(request: NextRequest) {
     if (!todo._id) {
         return NextResponse.json({ message: "Todo ID is required" })
     }
-    if (!todo.content && !todo.isCompleted && !todo.category) {
+    if (!todo.content && !todo.status && !todo.category) {
         return NextResponse.json({ message: "No fields provided to update" })
     }
     try {
@@ -76,7 +76,7 @@ export async function PUT(request: NextRequest) {
         const UpdatedTodo = await TodoModel.findByIdAndUpdate(todo._id, {
             content: todo?.content,
             category: todo?.category,
-            isCompleted: todo?.isCompleted,
+            status: todo?.status,
             modifiedAt: new Date()
         }, { new: true })
 
@@ -92,7 +92,8 @@ export async function PUT(request: NextRequest) {
     }
 }
 export async function DELETE(request: NextRequest) {
-    const {_id} = await request.json()
+    const {searchParams} = new URL(request.url)
+    const _id = searchParams.get('id')
     if (!_id) {
         return NextResponse.json({ message: "Todo ID is required" })
     }

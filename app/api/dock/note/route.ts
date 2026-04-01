@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 }
 export async function POST(request: NextRequest) {
     const note = await request.json()
-    if (!note.content || !note.user_email) {
+    if (!note.user_email) {
         return NextResponse.json({ message: "required fields are missing" })
     }
 
@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
         }
         const newNote = new NoteModel({
             user_email: note.user_email,
-            content: note.content,
+            title: note?.title,
+            content: note?.content,
             category: note?.category,
         })
 
@@ -62,12 +63,13 @@ export async function PUT(request: NextRequest) {
     if (!note._id) {
         return NextResponse.json({ message: "Note ID is required" })
     }
-    if (!note.content && !note.category) {
+    if (!note.title && !note.content && !note.category) {
         return NextResponse.json({ message: "No fields provided to update" })
     }
     try {
         await connectDB()
         const UpdatedNote = await NoteModel.findByIdAndUpdate(note._id, {
+            title: note?.title,
             content: note?.content,
             category: note?.category,
             modifiedAt: new Date()
@@ -85,7 +87,8 @@ export async function PUT(request: NextRequest) {
     }
 }
 export async function DELETE(request: NextRequest) {
-    const { _id } = await request.json()
+    const {searchParams} = new URL(request.url)
+    const _id = searchParams.get('id')
     if (!_id) {
         return NextResponse.json({ message: "Note ID is required" })
     }
