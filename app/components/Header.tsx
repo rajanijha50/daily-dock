@@ -19,7 +19,10 @@ const UserProfile = ({ name, email, image }: UserType) => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
@@ -42,11 +45,13 @@ const UserProfile = ({ name, email, image }: UserType) => {
         aria-haspopup="true"
         className=" flex items-center justify-center transition-colors"
       >
-        <img
-          className="w-10 rounded-full border"
-          src={image || "/globe.svg"}
-          alt={name || 'user'}
-        />
+        {image ? (
+          <img className="w-10 rounded-full border" src={image} alt={"User"} />
+        ) : (
+          <div className="w-10 h-10 font-semibold rounded-full border flex items-center justify-center bg-muted-foreground dark:bg-popover">
+            {name?.charAt(0).toUpperCase()}
+          </div>
+        )}
       </button>
 
       {/* Dropdown menu */}
@@ -86,7 +91,7 @@ const TimerStatus = () => {
     toggleTimer,
     resetTimer,
     setMode,
-    tick
+    tick,
   } = timerStore();
   const [hovered, setHovered] = useState(false);
 
@@ -111,10 +116,6 @@ const TimerStatus = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex items-center gap-1 px-3 py-1 bg-orange-500/10 text-orange-500 rounded-full border border-orange-500/20" title="Daily Streak">
-        <Flame size={18} className="fill-orange-500" />
-        <span className="text-xs font-bold">12</span>
-      </div>
       <div className="relative flex flex-col items-center justify-center group inset-0 hover:bg-accent/20 rounded-full transition-transform duration-200">
         <button
           onMouseEnter={() => setHovered(true)}
@@ -128,12 +129,27 @@ const TimerStatus = () => {
             className="z-50 absolute top-10 w-40 min-h-20 p-2 bg-muted-foreground dark:bg-popover rounded-sm scale-0 transition-transform duration-200 group-hover:scale-100 border flex flex-col justify-center items-center gap-2 mx-auto"
           >
             <span className="text-2xl font-bold">{formatTime(timeLeft)}</span>
-            <span onClick={() => setMode(mode === "pomodoro" ? "break" : "pomodoro")} className={`text-sm capitalize cursor-pointer ${mode === "pomodoro" ? "text-blue-500" : "text-green-500"}`}>{mode}</span>
+            <span
+              onClick={() =>
+                setMode(mode === "pomodoro" ? "break" : "pomodoro")
+              }
+              className={`text-sm capitalize cursor-pointer ${mode === "pomodoro" ? "text-blue-500" : "text-green-500"}`}
+            >
+              {mode}
+            </span>
             <div className="flex items-center gap-2">
-              <button className="hover:bg-white/20 p-1.5 rounded-full" onClick={toggleTimer} title={isActive ? "Pause" : "Start"}>
+              <button
+                className="hover:bg-white/20 p-1.5 rounded-full"
+                onClick={toggleTimer}
+                title={isActive ? "Pause" : "Start"}
+              >
                 {isActive ? <Pause size={20} /> : <Play size={20} />}
               </button>
-              <button className="hover:bg-white/20 p-1.5 rounded-full" onClick={resetTimer} title="Reset">
+              <button
+                className="hover:bg-white/20 p-1.5 rounded-full"
+                onClick={resetTimer}
+                title="Reset"
+              >
                 <RotateCcw size={20} />
               </button>
             </div>
@@ -150,15 +166,52 @@ const Header = () => {
   // console.log(session)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<UserType>();
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [maxStreak, setCurrentMaxStreak] = useState(0);
+
+  const updateStreak = async (emailId: string | undefined) => {
+    if (!emailId) return;
+    try {
+      await fetch("/api/user/streak", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          emailId: emailId,
+        }),
+      });
+    } catch (error) {
+      console.log("Header update streak error: ", error);
+    }
+  };
+
+  const getUserStreak = async (emailId: string | undefined) => {
+    if (!emailId) return;
+    try {
+      const streak = await fetch(`/api/user/streak?emailId=${emailId}`);
+      const res = await streak.json();
+      if (res?.success) {
+        setCurrentStreak(res.data.currentStreak);
+        setCurrentMaxStreak(res.data.maxStreak);
+      }
+    } catch (error) {
+      console.log("Header update streak error: ", error);
+    }
+  };
 
   useEffect(() => {
     if (session && session?.user) {
       setUser(session.user);
+      // console.log(session.user)
       setIsLoggedIn(true);
+      updateStreak(session.user.email!)
+      getUserStreak(session.user.email!)
     } else {
       setIsLoggedIn(false);
     }
   }, [session]);
+
   const pages = [
     { name: "home", href: "/" },
     { name: "about", href: "/about" },
@@ -182,7 +235,7 @@ const Header = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-1">
-              {pages.map((page, index) => (
+              {pages.map((page) => (
                 <Link
                   key={page.name}
                   href={page.href}
@@ -192,6 +245,16 @@ const Header = () => {
                   <div className="absolute inset-0 bg-accent/20 rounded-full scale-0 transition-transform duration-200 group-hover:scale-100"></div>
                 </Link>
               ))}
+
+              {currentStreak > 0 && (
+                <div
+                  className="flex items-center gap-1 px-3 py-1 bg-orange-500/10 text-orange-500 rounded-full border border-orange-500/20"
+                  title={`Current Streak: ${currentStreak}`}
+                >
+                  <Flame size={18} className="fill-orange-500" />
+                  <span className="text-xs font-bold">{currentStreak}</span>
+                </div>
+              )}
 
               <TimerStatus />
 
