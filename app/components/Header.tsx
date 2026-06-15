@@ -1,10 +1,12 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { Menu, Pause, Play, RotateCcw, Timer, X, Flame } from "lucide-react";
+import { Menu, Pause, Play, RotateCcw, Timer, X, Flame, ExternalLink } from "lucide-react";
 import { ModeToggle } from "@/components/ui/theme";
 import { timerStore } from "../store/timerStore";
+import { userStore } from "../store/userStore";
+
 
 type UserType = {
   name?: string | null | undefined;
@@ -94,6 +96,11 @@ const TimerStatus = () => {
     tick,
   } = timerStore();
   const [hovered, setHovered] = useState(false);
+  const alarmRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    alarmRef.current = new Audio('/audio/notification_sound.mp3');
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -105,8 +112,31 @@ const TimerStatus = () => {
 
     return () => {
       if (interval) clearInterval(interval);
+      if (alarmRef.current) {
+        alarmRef.current.pause();
+        alarmRef.current.currentTime = 0;
+      }
     };
   }, [isActive, tick]);
+
+  const prevModeRef = useRef(mode);
+
+  useEffect(() => {
+    if (prevModeRef.current !== mode) {
+      // If the timer was active and the mode changed, it means a session completed
+      if (isActive && alarmRef.current) {
+        console.log('playing...')
+        alarmRef.current.play().catch(err => {
+          console.warn("Audio play blocked by browser autoplay policy:", err);
+        });
+      }
+      prevModeRef.current = mode;
+    } else if (!isActive && alarmRef.current) {
+      // Pause alarm if timer is paused
+      alarmRef.current.pause();
+      alarmRef.current.currentTime = 0;
+    }
+  }, [mode, isActive]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -133,6 +163,7 @@ const TimerStatus = () => {
               onClick={() =>
                 setMode(mode === "pomodoro" ? "break" : "pomodoro")
               }
+              title="Switch Mode"
               className={`text-sm capitalize cursor-pointer ${mode === "pomodoro" ? "text-blue-500" : "text-green-500"}`}
             >
               {mode}
@@ -152,6 +183,9 @@ const TimerStatus = () => {
               >
                 <RotateCcw size={20} />
               </button>
+              <Link href = {'/timer'} title="Open in Page" className="hover:bg-white/20 p-1.5 rounded-full">
+                <ExternalLink size={20}/>
+              </Link>
             </div>
           </div>
         )}
@@ -166,13 +200,27 @@ const Header = () => {
   // console.log(session)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<UserType>();
-  const [currentStreak, setCurrentStreak] = useState(0);
-  const [maxStreak, setCurrentMaxStreak] = useState(0);
+  const {
+    currentStreak,
+    maxStreak,
+    lastLoginDate,
+    setUser: setStoredUser,
+    clearUser
+  } = userStore();
 
-  const updateStreak = async (emailId: string | undefined) => {
+  const getTodayString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const fetchUserState = async (emailId: string | undefined, todayStr: string) => {
     if (!emailId) return;
     try {
-      await fetch("/api/user/streak", {
+      // 1. Update streak via PUT
+      const updateRes = await fetch("/api/user/streak", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -181,40 +229,62 @@ const Header = () => {
           emailId: emailId,
         }),
       });
-    } catch (error) {
-      console.log("Header update streak error: ", error);
-    }
-  };
+      const updateData = await updateRes.json();
 
-  const getUserStreak = async (emailId: string | undefined) => {
-    if (!emailId) return;
-    try {
-      const streak = await fetch(`/api/user/streak?emailId=${emailId}`);
-      const res = await streak.json();
-      if (res?.success) {
-        setCurrentStreak(res.data.currentStreak);
-        setCurrentMaxStreak(res.data.maxStreak);
+      // 2. Fetch updated streak details via GET
+      const getRes = await fetch(`/api/user/streak?emailId=${emailId}`);
+      const getData = await getRes.json();
+
+      if (getData?.success) {
+        setStoredUser({
+          user: {
+            name: session?.user?.name || "",
+            email: session?.user?.email || "",
+            image: session?.user?.image || "",
+          },
+          currentStreak: getData.data.currentStreak,
+          maxStreak: getData.data.maxStreak,
+          lastLoginDate: todayStr,
+        });
+      } else if (updateData?.success) {
+        // Fallback to update response if GET fails
+        setStoredUser({
+          user: {
+            name: session?.user?.name || "",
+            email: session?.user?.email || "",
+            image: session?.user?.image || "",
+          },
+          currentStreak: updateData.data.currentStreak,
+          maxStreak: updateData.data.maxStreak,
+          lastLoginDate: todayStr,
+        });
       }
     } catch (error) {
-      console.log("Header update streak error: ", error);
+      console.log("Header update/fetch user state error: ", error);
     }
   };
 
   useEffect(() => {
     if (session && session?.user) {
       setUser(session.user);
-      // console.log(session.user)
       setIsLoggedIn(true);
-      updateStreak(session.user.email!)
-      getUserStreak(session.user.email!)
+
+      const email = session.user.email ?? undefined;
+      const todayStr = getTodayString();
+
+      // Only call to fetch user state if the last login date is not the same as current date
+      if (lastLoginDate !== todayStr) {
+        fetchUserState(email, todayStr);
+      }
     } else {
       setIsLoggedIn(false);
+      clearUser();
     }
-  }, [session]);
+  }, [session, lastLoginDate]);
 
   const pages = [
-    { name: "home", href: "/" },
-    { name: "about", href: "/about" },
+    // { name: "home", href: "/" },
+    // { name: "about", href: "/about" },
     { name: "diary", href: "/diary" },
     { name: "todos", href: "/todo" },
     { name: "notes", href: "/note" },
@@ -239,7 +309,7 @@ const Header = () => {
                 <Link
                   key={page.name}
                   href={page.href}
-                  className="relative px-5 py-2 text-sm font-medium capitalize transition-all duration-200  group"
+                  className="relative px-4 py-2 text-sm font-medium capitalize transition-all duration-200  group"
                 >
                   <span className="relative z-10">{page.name}</span>
                   <div className="absolute inset-0 bg-accent/20 rounded-full scale-0 transition-transform duration-200 group-hover:scale-100"></div>
@@ -319,7 +389,7 @@ const Header = () => {
                   Get Started
                 </Link>
               )}
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-start mt-2">
                 <ModeToggle />
               </div>
             </div>

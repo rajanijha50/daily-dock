@@ -7,7 +7,7 @@ export default function LandingPage() {
     <section className="animate-slide-in-top flex flex-col items-start max-w-4xl mx-auto px-6 py-24 transition-all duration-200">
       
       <Badge variant="outline" className="mb-8 uppercase tracking-widest text-xs font-medium text-secondary dark:text-muted-foreground rounded-full px-4 py-1.5">
-        <span className="mr-2 inline-block w-1.5 h-1.5 rounded-full bg-current opacity-100" />
+        <span className="mr-2 inline-block w-1.5 h-1.5 rounded-full bg-primary dark:bg-foreground opacity-100 animate-pulse" />
         Your productivity hub
       </Badge>
 
@@ -32,9 +32,7 @@ export default function LandingPage() {
         </Button> */}
       </div>
 
-      <p className="mt-4 text-xs text-muted-foreground tracking-wide">
-        No credit card required · Takes 30 seconds to set up
-      </p>
+
 
     </section>
   );

@@ -21,7 +21,7 @@ interface ExtendedToastOptions extends HotToastOptions {
  * @param options Customization options for the toast
  */
 export const SendNotification = (
-  message: string,
+  message: any,
   typeOrOptions?:
     | "success"
     | "error"
@@ -29,6 +29,16 @@ export const SendNotification = (
     | "default"
     | ExtendedToastOptions,
 ) => {
+  // Safe-guard message rendering to prevent "Objects are not valid as a React child"
+  let messageStr = "";
+  if (message instanceof Error) {
+    messageStr = message.message;
+  } else if (message && typeof message === "object") {
+    messageStr = message.message || message.name || JSON.stringify(message);
+  } else {
+    messageStr = String(message || "");
+  }
+
   // Normalize parameters
   let type: "success" | "error" | "loading" | "default" = "default";
   let options: ExtendedToastOptions = {};
@@ -67,7 +77,7 @@ export const SendNotification = (
   // Trigger the appropriate toast
   switch (type) {
     case "success":
-      return toast.success(message, {
+      return toast.success(messageStr, {
         ...toastOptions,
         iconTheme: options.iconTheme || {
           primary: "#10b981", // Emerald 500
@@ -75,7 +85,7 @@ export const SendNotification = (
         },
       });
     case "error":
-      return toast.error(message, {
+      return toast.error(messageStr, {
         ...toastOptions,
         iconTheme: options.iconTheme || {
           primary: "#ef4444", // Red 500
@@ -83,9 +93,9 @@ export const SendNotification = (
         },
       });
     case "loading":
-      return toast.loading(message, toastOptions);
+      return toast.loading(messageStr, toastOptions);
     default:
-      return toast(message, toastOptions);
+      return toast(messageStr, toastOptions);
   }
 };
 

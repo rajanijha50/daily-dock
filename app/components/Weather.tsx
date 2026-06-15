@@ -27,6 +27,7 @@ import {
   Moon,
 } from "lucide-react";
 import {
+  getCurrentGoogleMap,
   getCurrentOpenWeather,
   getCurrentOpenWeather2,
   getLocationFromIPInfo,
@@ -45,7 +46,7 @@ const Weather = () => {
     const lon = IPdata.loc.split(",")[1];
     setCity(IPdata.city);
     setState(IPdata.region);
-    console.log("from IPinfo: ", IPdata);
+    // console.log("from IPinfo: ", IPdata);
 
     const weather1 = await getCurrentOpenWeather(lat, lon);
     setWeatherData(weather1);
@@ -260,99 +261,99 @@ const Weather = () => {
             <div className="relative">
               {/* Arc background */}
               <div className="h-32 relative group">
-                <svg className="w-full h-full" viewBox="0 0 400 100">
-                  {/* Background arc */}
-                  <path
-                    d="M 20 100 Q 200 0 380 100"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.2)"
-                    strokeWidth="3"
-                  />
-                  {/* Active arc (daytime portion) */}
-                  {!isNight && (
-                    <path
-                      d="M 20 100 Q 200 0 380 100"
-                      fill="none"
-                      stroke="url(#gradient)"
-                      strokeWidth="3"
-                      strokeDasharray="560"
-                      strokeDashoffset={560 - (560 * sunPosition) / 100}
-                      className="transition-all duration-1000"
-                    />
-                  )}
-                  
-                  {/* Gradient definition */}
-                  <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#fbbf24" />
-                      <stop offset="50%" stopColor="#f59e0b" />
-                      <stop offset="100%" stopColor="#ef4444" />
-                    </linearGradient>
-                    <linearGradient id="nightGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#6366f1" />
-                      <stop offset="50%" stopColor="#8b5cf6" />
-                      <stop offset="100%" stopColor="#a855f7" />
-                    </linearGradient>
-                  </defs>
-                  
-                  {/* Night arc */}
-                  {isNight && (
-                    <path
-                      d="M 20 100 Q 200 0 380 100"
-                      fill="none"
-                      stroke="url(#nightGradient)"
-                      strokeWidth="3"
-                      opacity="0.5"
-                    />
-                  )}
-                </svg>
+  <svg className="w-full h-full" viewBox="0 0 400 100">
+    {/* Background arc - CHANGED TO STRAIGHT LINE */}
+    <path
+      d="M 20 100 L 380 100"
+      fill="none"
+      stroke="rgba(255,255,255,0.2)"
+      strokeWidth="3"
+    />
+    {/* Active arc (daytime portion) - CHANGED TO STRAIGHT LINE */}
+    {!isNight && (
+      <path
+        d="M 20 100 L 380 100"
+        fill="none"
+        stroke="url(#gradient)"
+        strokeWidth="3"
+        strokeDasharray="560"
+        strokeDashoffset={560 - (560 * sunPosition) / 100}
+        className="transition-all duration-1000"
+      />
+    )}
+    
+    {/* Gradient definition */}
+    <defs>
+      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#fbbf24" />
+        <stop offset="50%" stopColor="#f59e0b" />
+        <stop offset="100%" stopColor="#ef4444" />
+      </linearGradient>
+      <linearGradient id="nightGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#6366f1" />
+        <stop offset="50%" stopColor="#8b5cf6" />
+        <stop offset="100%" stopColor="#a855f7" />
+      </linearGradient>
+    </defs>
+    
+    {/* Night arc - CHANGED TO STRAIGHT LINE */}
+    {isNight && (
+      <path
+        d="M 20 100 L 380 100"
+        fill="none"
+        stroke="url(#nightGradient)"
+        strokeWidth="3"
+        opacity="0.5"
+      />
+    )}
+  </svg>
 
-                {/* Sun/Moon position indicator with hover tooltip */}
-                <div
-                  className="absolute transition-all duration-1000 ease-in-out cursor-pointer group/icon"
-                  style={{
-                    left: !isNight 
-                      ? `${(20 + (360 * sunPosition) / 100) / 400 * 100}%`
-                      : '50%',
-                    bottom: !isNight
-                      ? `${(Math.sin((sunPosition * Math.PI) / 100) * 100) / 100 * 100}%`
-                      : '50%',
-                    transform: 'translate(-50%, 50%)',
-                  }}
-                >
-                  {/* Sun/Moon Icon */}
-                  <div className="relative">
-                    {isNight ? (
-                      <div className="bg-indigo-400/30 backdrop-blur-sm p-2 rounded-full border-2 border-indigo-300/50 shadow-lg shadow-indigo-500/50 hover:scale-110 transition-transform">
-                        <Moon className="text-white" size={24} />
-                      </div>
-                    ) : (
-                      <div className="bg-yellow-400/30 backdrop-blur-sm p-2 rounded-full border-2 border-yellow-300/50 shadow-lg shadow-yellow-500/50 hover:scale-110 transition-transform">
-                        <Sun className="text-yellow-300" size={24} />
-                      </div>
-                    )}
-                    
-                    {/* Tooltip showing current time */}
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-black/80 backdrop-blur-md text-white text-xs rounded-lg opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none shadow-xl">
-                      <div className="font-semibold">
-                        {weatherData?.dt
-                          ? formatTime(weatherData.dt, weatherData.timezone)
-                          : "..."}
-                      </div>
-                      <div className="text-white/70 text-[10px]">Current Time</div>
-                      {/* Arrow */}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-[1px]">
-                        <div className="border-4 border-transparent border-t-black/80" />
-                      </div>
-                    </div>
+  {/* Sun/Moon position indicator with hover tooltip */}
+  <div
+    className="absolute transition-all duration-1000 ease-in-out cursor-pointer group/icon"
+    style={{
+  left: !isNight 
+    ? `${(20 + (360 * sunPosition) / 100) / 400 * 100}%`
+    : '50%', // Moon stays in the center horizontally
+    bottom: !isNight
+    ? `0%` // Sun height (optional, remove if you want sun flat too)
+    : '0%', // Moon sits on the line (bottom of SVG)
+  transform: 'translate(-50%, 50%)',
+}}
+  >
+    {/* Sun/Moon Icon */}
+    <div className="relative">
+      {isNight ? (
+        <div className="bg-indigo-400/30 backdrop-blur-sm p-2 rounded-full border-2 border-indigo-300/50 shadow-lg shadow-indigo-500/50 hover:scale-110 transition-transform">
+          <Moon className="text-white" size={24} />
+        </div>
+      ) : (
+        <div className="bg-yellow-400/30 backdrop-blur-sm p-2 rounded-full border-2 border-yellow-300/50 shadow-lg shadow-yellow-500/50 hover:scale-110 transition-transform">
+          <Sun className="text-yellow-300" size={24} />
+        </div>
+      )}
+      
+      {/* Tooltip showing current time */}
+      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-black/80 backdrop-blur-md text-white text-xs rounded-lg opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none shadow-xl">
+        <div className="font-semibold">
+          {weatherData?.dt
+            ? formatTime(weatherData.dt, weatherData.timezone)
+            : "..."}
+        </div>
+        <div className="text-white/70 text-[10px]">Updated At</div>
+        {/* Arrow */}
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+          <div className="border-4 border-transparent border-t-black/80" />
+        </div>
+      </div>
 
-                    {/* Glow effect */}
-                    <div className={`absolute inset-0 rounded-full blur-md -z-10 ${
-                      isNight ? 'bg-indigo-400/40' : 'bg-yellow-400/40'
-                    } animate-pulse`} />
-                  </div>
-                </div>
-              </div>
+      {/* Glow effect */}
+      <div className={`absolute inset-0 rounded-full blur-md -z-10 ${
+        isNight ? 'bg-indigo-400/40' : 'bg-yellow-400/40'
+      } animate-pulse`} />
+    </div>
+  </div>
+</div>
 
               {/* Sunrise and Sunset times */}
               <div className="flex justify-between items-center mt-2">

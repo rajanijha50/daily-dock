@@ -3,6 +3,7 @@ import { Cog, Pause, Play, RotateCcw } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Header from "../components/Header";
 import { timerStore } from "../store/timerStore";
+import Footer from "../components/Footer";
 
 const Timer = () => {
 
@@ -91,7 +92,7 @@ const Timer = () => {
   return (
     <div className= 'page-layout'>
       <Header />
-    <div className="flex flex-col items-center justify-center  transition-colors duration-500 font-sans select-none">
+    <div className="flex flex-col items-center justify-center  transition-colors duration-500 font-sans select-none min-h-screen">
       <h1 className="mt-5 text-4xl font-poppins font-semibold text-center mb-8">Pomodoro Timer</h1>
       {/* Mode Indicator */}
       <div className="flex space-x-4">
@@ -232,6 +233,7 @@ const Timer = () => {
         </div>
       )}
     </div>
+    <Footer/>
     </div>
   );
 };
