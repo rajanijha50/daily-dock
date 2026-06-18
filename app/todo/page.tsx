@@ -12,6 +12,8 @@ import {
 import { TodoContainer, TodoStatus } from "../components/TodoContainer";
 import Header from "../components/Header";
 import LoadingSpinner from "../components/LoadingSpinner";
+import Footer from "../components/Footer";
+import { userStore } from "../store/userStore";
 
 export type ITodo = {
   _id?: string;
@@ -28,6 +30,7 @@ export default function TodoPage() {
   const [todos, setTodos] = useState<ITodo[]>([]);
   const [activeTodo, setActiveTodo] = useState<ITodo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const {user} = userStore()
 
   // Fetch Todos
   useEffect(() => {
@@ -38,7 +41,7 @@ export default function TodoPage() {
   const fetchTodos = async () => {
     try {
       const res = await fetch(
-        `/api/dock/todo?user_email=bittujha9142@gmail.com`,
+        `/api/dock/todo?user_email=${user?.email}`,
       );
       const data = await res.json();
       if (res.ok) {
@@ -58,7 +61,7 @@ export default function TodoPage() {
         body: JSON.stringify({
           content,
           status,
-          user_email: "bittujha9142@gmail.com",
+          user_email: user?.email,
         }),
       });
       const data = await res.json();
@@ -135,7 +138,7 @@ export default function TodoPage() {
         <div className="max-w-6xl mx-auto px-6 py-10">
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold tracking-tight">My Tasks</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">My Todos</h1>
             <p className="text-sm mt-1">
               Track your progress by making todos.
             </p>
@@ -148,7 +151,7 @@ export default function TodoPage() {
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
           >
-            <div className="flex flex-col md:flex-row gap-6 items-start">
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
               {isLoading ? (
                 <div className="w-full flex items-center justify-center py-32">
                   <LoadingSpinner text="Todos" />
@@ -182,6 +185,7 @@ export default function TodoPage() {
           </DndContext>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 }

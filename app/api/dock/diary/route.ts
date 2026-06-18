@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         if (!alreadyExist || alreadyExist == null) {
             return NextResponse.json({ message: "couldn't get data for this user, because user with this email doesn't exist", status: 404 })
         }
-        const DiaryData = await DiaryModel.find({ user_email: user_email })
+        const DiaryData = await DiaryModel.find({ user_email: user_email }).sort({ pinned: -1, createdAt: -1 })
         return NextResponse.json({ message: "List of all diaries", data: DiaryData })
     } catch (error) {
         console.log(error)
@@ -62,7 +62,7 @@ export async function PUT(request: NextRequest) {
     if (!diary._id) {
         return NextResponse.json({ message: "Diary ID is required" })
     }
-    if (!diary.content && !diary.title) {
+    if (!diary.content && !diary.title && !diary.pinned) {
         return NextResponse.json({ message: "No fields provided to update" })
     }
     try {
@@ -70,6 +70,7 @@ export async function PUT(request: NextRequest) {
         const UpdatedDiary = await DiaryModel.findByIdAndUpdate(diary._id, {
             title: diary?.title,
             content: diary?.content,
+            pinned: diary?.pinned,
             modifiedAt: new Date()
         }, { new: true })
 

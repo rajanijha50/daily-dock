@@ -3,11 +3,14 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import DiarySidebar from "@/app/components/DiarySidebar";
 import DiaryEditor from "@/app/components/DiaryEditor";
+import Footer from "../components/Footer";
+import { userStore } from "../store/userStore";
 
 export type IDiary = {
   _id?: string;
   title: string;
   content: string;
+  pinned: boolean;
   createdAt: Date;
   modifiedAt: Date;
 };
@@ -16,30 +19,29 @@ const DiaryApp = () => {
   const [diaries, setDiaries] = useState<IDiary[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const { user } = userStore();
+
+  useEffect(() => {
+    fetchDiaries();
+  }, []);
 
   // Fetch Diaries
   const fetchDiaries = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `/api/dock/diary?user_email=bittujha9142@gmail.com`,
-      );
+      const res = await fetch(`/api/dock/diary?user_email=${user?.email}`);
       const data = await res.json();
       if (res.ok) {
         setDiaries(data.data);
-        // console.log(data.data)
       }
     } catch (error) {
       console.error(error);
-      //   window.alert(error)
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchDiaries();
-  }, []);
 
   // Create New Diary
   const handleNewDiary = async () => {
@@ -48,7 +50,7 @@ const DiaryApp = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_email: "bittujha9142@gmail.com",
+          user_email: user?.email,
           title: "",
           content: "",
         }),
@@ -65,7 +67,7 @@ const DiaryApp = () => {
 
   // Update Diary
   const handleUpdateDiary = async (updatedDiary: IDiary) => {
-    // Optimistic update in list: finding the diary and setting the new value in it
+    setIsSaving(true)
     setDiaries((prev) =>
       prev.map((d) => (d._id === updatedDiary._id ? updatedDiary : d)),
     );
@@ -79,6 +81,7 @@ const DiaryApp = () => {
     } catch (error) {
       console.error("Failed to update diary", error);
     }
+    setIsSaving(false)
   };
 
   // Delete Diary
@@ -94,7 +97,7 @@ const DiaryApp = () => {
     }
   };
 
-  const selectedDiary = diaries.find((d) => d._id === selectedId);
+  const selectedDiary = diaries?.find((d) => d._id === selectedId);
 
   return (
     <div className="page-layout">
@@ -102,24 +105,34 @@ const DiaryApp = () => {
       <div className="flex items-start border-0 h-screen">
         <DiarySidebar
           isLoading={isLoading}
+          isSaving={isSaving}
           diaries={diaries}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onNew={handleNewDiary}
+          onUpdate={handleUpdateDiary}
           onDelete={handleDeleteDiary}
         />
 
         <main className="h-full flex-1 flex-col overflow-hidden">
           {selectedDiary ? (
-            <DiaryEditor diary={selectedDiary} onUpdate={handleUpdateDiary} />
+            <DiaryEditor
+              diary={selectedDiary} 
+              onUpdate={handleUpdateDiary} 
+              isSaving={isSaving} />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <h1 className="text-3xl font-semibold tracking-tight mb-4">My Diary</h1>
-              <p className='text-sm mt-1'>Select a diary from the sidebar or create a new one.</p>
+              <h1 className="text-3xl font-semibold tracking-tight mb-4">
+                My Diary
+              </h1>
+              <p className="text-sm mt-1">
+                Select a diary or create a new one.
+              </p>
             </div>
           )}
         </main>
       </div>
+      <Footer />
     </div>
   );
 };

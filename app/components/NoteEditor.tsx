@@ -2,13 +2,14 @@
 import { useEffect, useRef, useState } from "react";
 import { INote } from "@/app/note/page";
 import { Button } from "@/components/ui/button";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, PinOff, Pin } from "lucide-react";
 
 interface NoteEditorProps {
   note: INote;
   onUpdate: (note: INote) => void;
   onDelete: (_id: string) => void;
   onClose: () => void;
+  isSaving: boolean
 }
 
 export default function NoteEditor({
@@ -16,9 +17,11 @@ export default function NoteEditor({
   onUpdate,
   onDelete,
   onClose,
+  isSaving
 }: NoteEditorProps) {
   const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content);
+  const [pinned, setPinned] = useState(note.pinned);
   const [category, setCategory] = useState(note.category);
   const [allowedCategories, setAllowedCategories] = useState<string[]>([
     "travel",
@@ -27,38 +30,34 @@ export default function NoteEditor({
     "fun",
   ]);
   const titleRef = useRef<HTMLInputElement>(null);
-  const [isSaving, setIsSaving] = useState<boolean>(false)
 
   useEffect(() => {
     setTitle(note.title);
     setContent(note.content);
+    setPinned(note.pinned);
+    setCategory(note.category);
   }, [note._id]);
 
   useEffect(() => {
     titleRef.current?.focus();
   }, [note._id]);
 
-  const handleSave = () => {
-    onUpdate({ ...note, title, content, modifiedAt: new Date() });
-  };
 
   // Auto-save
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (title !== note.title || content !== note.content || category !== note.category) {
-        setIsSaving(true)
-        onUpdate({ ...note, title, content, category });
-        setIsSaving(false)  
+      if (title !== note.title || content !== note.content || pinned !== note.pinned || category !== note.category) {
+        onUpdate({ ...note, title, content, pinned, category });
       }
-    }, 3000);
+    }, 1500);
 
     return () => clearTimeout(timer);
-  }, [title, content, category, onClose]);
+  }, [title, content, pinned, category, onClose]);
 
   return (
     <div
-      className="w-200 h-full flex flex-col bg-primary-foregroud border-2 text-pimary dark:text-foreground"
-      onClick={(e) => e.stopPropagation()}
+      className="w-200 h-full flex flex-col bg-primary-foregroud border border-border rounded-2xl text-pimary dark:text-foreground"
+      onClick={(e)=> e.stopPropagation()}
     >
       {/* Toolbar */}
       <div className="flex items-center justify-between px-6 py-4 border-b">
@@ -73,7 +72,10 @@ export default function NoteEditor({
         </span>
         <div className="flex items-center gap-2">
           <select className="p-2 border outline-none rounded-md" name="category" id="category" 
-          onChange={(e) => onUpdate({...note, category: e.target.value})}
+          onChange={(e) => {
+            setCategory(e.target.value)
+            }
+          }
           >
             <option className="bg-secondary text-primary-foreground dark:bg-primary dark:text-white hover:bg-red-100" value={`${category || "default"}`}>
               {category || "select category"}
@@ -87,18 +89,26 @@ export default function NoteEditor({
         <div className="flex items-center gap-2">
           <span className="capitalize mr-2">{isSaving ? 'saving...' : 'saved'}</span>
           <Button
-            variant="ghost"
+            variant="default"
+            size="icon"
+            onClick={() => {setPinned(!pinned)}}
+            className={`bg-transparent text-foreground hover:bg-white/20`}
+          >
+            {pinned ? <PinOff size={16} /> : <Pin size={16} />}
+          </Button>
+          <Button
+            variant="default"
             size="icon"
             onClick={() => onDelete(note._id!)}
-            className="text-red-600 hover:bg-red-200"
+            className="text-red-600 bg-transparent hover:bg-red-500/10"
           >
             <Trash2 size={16} />
           </Button>
           <Button
-            variant="ghost"
+            variant="default"
             size="icon"
             onClick={onClose}
-            className=""
+            className="bg-transparent text-foreground hover:bg-red-500/20"
           >
             <X size={18} />
           </Button>
@@ -106,7 +116,7 @@ export default function NoteEditor({
       </div>
 
       {/* Editor area */}
-      <div className="flex-1 overflow-y-auto px-5 py-0 md:px-16 md:py-12">
+      <div className="flex-1 px-5 py-0 md:px-16 md:py-12">
         <input
           ref={titleRef}
           type="text"
@@ -119,7 +129,7 @@ export default function NoteEditor({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Start writing your thoughts..."
-          className="w-full bg-transparent text-base leading-relaxed outline-none resize-none border-t pt-6"
+          className="w-full h-full bg-transparent text-base leading-relaxed outline-none resize-none border-t pt-6 pb-10"
         />
       </div>
     </div>

@@ -1,17 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Plus, FileText, Trash2 } from "lucide-react";
+import { Plus, FileText, Trash2, Pin, PinOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import NoteEditor from "../components/NoteEditor";
 import LoadingSpinner from "../components/LoadingSpinner";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
+import { userStore } from "../store/userStore";
 
 export type INote = {
   _id?: string;
   title: string;
   content: string;
   category?: string;
+  pinned?: boolean;
   createdAt: Date;
   modifiedAt: Date;
 };
@@ -21,6 +24,9 @@ export default function NotePage() {
   const [activeNote, setActiveNote] = useState<INote | null>();
   const [openEditor, setOpenEditor] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+
+  const { user } = userStore();
 
   useEffect(() => {
     fetchNotes();
@@ -28,9 +34,7 @@ export default function NotePage() {
 
   const fetchNotes = async () => {
     try {
-      const res = await fetch(
-        `/api/dock/note?user_email=bittujha9142@gmail.com`,
-      );
+      const res = await fetch(`/api/dock/note?user_email=${user?.email}`);
       const data = await res.json();
       if (res.ok) {
         setNotes(data.data);
@@ -46,7 +50,7 @@ export default function NotePage() {
       const res = await fetch(`/api/dock/note`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_email: "bittujha9142@gmail.com" }),
+        body: JSON.stringify({ user_email: user?.email }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -59,6 +63,7 @@ export default function NotePage() {
     }
   };
   const handleUpdateNote = async (updatedNote: INote) => {
+    setIsSaving(true)
     setNotes((prev) =>
       prev.map((n) => (n._id === updatedNote._id ? updatedNote : n)),
     );
@@ -70,6 +75,8 @@ export default function NotePage() {
       });
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsSaving(false)
     }
   };
   const handleDeleteNote = async (noteId: string) => {
@@ -82,11 +89,6 @@ export default function NotePage() {
       console.error(error);
     }
   };
-  const formatDate = (date: Date) =>
-    new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
 
   const excerpt = (content: string) =>
     content?.slice(0, 120).replace(/\n/g, " ").trim() || "No content yet.";
@@ -94,10 +96,14 @@ export default function NotePage() {
   return (
     <div className="page-layout">
       <Header />
-      <div className="h-full">
+      <div className="min-h-screen">
         <div>
-          <h1 className="text-center text-2xl font-semibold tracking-tight mt-10">My Notes</h1>
-          <p className="text-center text-sm mt-3">Note things happening in your life.</p>
+          <h1 className="text-center text-4xl font-semibold tracking-tight mt-10">
+            My Notes
+          </h1>
+          <p className="text-center text-sm mt-3">
+            Note things happening in your life.
+          </p>
         </div>
 
         {/* Notes container */}
@@ -117,45 +123,55 @@ export default function NotePage() {
               {notes?.map((note) => (
                 <Card
                   key={note._id}
+                  className="h-64 text-primary bg-muted/50 dark:bg-accent/50 hover:dark:bg-accent dark:text-foreground border border-border rounded-lg p-4 hover:shadow-md hover:bg-muted transition-all delay-100 duration-200 group hover:scale-102 flex flex-col justify-start"
                   onClick={() => {
                     setActiveNote(note);
                     setOpenEditor(true);
                   }}
-                  className={`text-primary cursor-default
-          bg-muted/50 dark:bg-accent/50 hover:dark:bg-accent dark:text-foreground border border-border rounded-2xl p-5 
-          hover:shadow-md hover:bg-muted transition-all delay-100 duration-200 group hover:scale-102
-        `}
                 >
-                  <h2 className="border-none pb-0 font-semibold text-base leading-snug line-clamp-2">
+                  <h2 className="font-semibold text-base leading-snug line-clamp-1">
                     {note.title || "Untitled"}
                   </h2>
-                  <p className="text-sm leading-relaxed line-clamp-3 mb-4">
+                  <p className="h-1/2 text-sm leading-relaxed line-clamp-4">
                     {excerpt(note.content)}
                   </p>
-                  <div className="border-t pt-3 flex justify-between items-center">
+                  <div className="justify-self-end border-t pt-3 flex justify-between items-center">
                     <span className="text-xs font-mono tracking-wide">
-                      {formatDate(note.modifiedAt)}
+                      {new Date(note.modifiedAt).toLocaleDateString("en-IN", {
+                        dateStyle: "medium",
+                      })}
                     </span>
                     {note.category && (
                       <span className="min-w-20 text-center capitalize p-2 bg-muted/50 dark:bg-white/20 rounded-md">
                         {note.category}
                       </span>
                     )}
-                    <Button
-                      className="text-destructive bg-transparent hover:bg-white/20 cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteNote(note._id!);
-                      }}
-                    >
-                      <Trash2 size={20} />
-                    </Button>
+                    <div>
+                      <button
+                        className="p-1.5 transition-all hover:bg-white/20 rounded"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdateNote({ ...note, pinned: !note.pinned });
+                        }}
+                      >
+                        {note.pinned ? <PinOff size={20} /> : <Pin size={20} />}
+                      </button>
+                      <button
+                        className="p-1.5 transition-all hover:bg-destructive/20 text-destructive rounded"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteNote(note._id!);
+                        }}
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
                   </div>
                 </Card>
               ))}
             </div>
           )}
-          <div className="fixed bottom-10 right-10">
+          <div className="fixed bottom-10 right-10 z-10">
             <button
               title="New Note"
               onClick={handleNewNote}
@@ -172,19 +188,21 @@ export default function NotePage() {
             {/* Backdrop */}
             <div
               className="fixed inset-0 backdrop-blur-lg flex justify-center items-center z-80"
-              onClick={() => setOpenEditor(false)}
+              onClick={() => !isSaving && setOpenEditor(false)}
               aria-hidden="true"
             >
               <NoteEditor
                 note={activeNote!}
                 onUpdate={handleUpdateNote}
                 onDelete={handleDeleteNote}
-                onClose={() => setOpenEditor(false)}
+                onClose={() => !isSaving && setOpenEditor(false)}
+                isSaving={isSaving}
               />
             </div>
           </>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

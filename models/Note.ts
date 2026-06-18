@@ -19,6 +19,11 @@ const NoteSchema = new mongoose.Schema<NoteType>({
         type: String,
         required: false
     },
+    pinned: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

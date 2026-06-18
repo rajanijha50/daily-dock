@@ -15,6 +15,7 @@ export interface NoteType {
     title?: string;
     content?: string;
     category?: string;
+    pinned?: boolean;
     createdAt: Date;
     modifiedAt: Date;
 }
@@ -23,6 +24,7 @@ export interface DiaryType {
     user_email: string;
     title?: string;
     content?: string;
+    pinned?: boolean;
     createdAt: Date;
     modifiedAt: Date;
 }

@@ -15,6 +15,11 @@ const DiarySchema = new mongoose.Schema<DiaryType>({
         type: String,
         required: false
     },
+    pinned: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -1,47 +1,46 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
-
 import {
-  ArrowDownFromLine,
   Download,
-  Menu,
+  PanelRightClose,
   Pin,
+  PinOff,
   Plus,
-  Search,
   Trash2,
   X,
 } from "lucide-react";
 import LoadingSpinner from "./LoadingSpinner";
 import { IDiary } from "../diary/page";
+import { userStore } from "../store/userStore";
+import { SendNotification } from "./SendNotification";
 
 interface SidebarProps {
   isLoading: Boolean;
+  isSaving: Boolean;
   diaries: IDiary[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   onNew: () => void;
+  onUpdate: (updatedDiary: IDiary) => void;
   onDelete: (e: React.MouseEvent, id: string) => void;
 }
 
 const DiarySidebar: React.FC<SidebarProps> = ({
   isLoading,
+  isSaving,
   diaries,
   selectedId,
   onSelect,
   onNew,
+  onUpdate,
   onDelete,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [displayedDiaries, setDisplayedDiaries] = useState(diaries);
+  const { user } = userStore();
 
   useEffect(() => {
-    setDisplayedDiaries(
-      diaries.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      ),
-    );
+    setDisplayedDiaries(diaries);
   }, [diaries]);
 
   const handleSortDiaries = (value: string) => {
@@ -49,6 +48,14 @@ const DiarySidebar: React.FC<SidebarProps> = ({
       return;
     }
     const sorted = [...displayedDiaries].sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+
+      if (a.pinned && b.pinned) {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      }
       switch (value) {
         case "date-down": //new to old
           return (
@@ -72,25 +79,55 @@ const DiarySidebar: React.FC<SidebarProps> = ({
   };
 
   const handleExportDiaries = () => {
-    alert("export button clicked!");
+    if (!displayedDiaries || displayedDiaries.length === 0) {
+      SendNotification("No diaries to export", "error");
+      return;
+    }
+
+    const filteredDiaries = displayedDiaries.map((diary) => ({
+      title: diary.title,
+      content: diary.content,
+      pinned: diary.pinned,
+      createdAt: diary.createdAt,
+    }));
+
+    const blob = new Blob([JSON.stringify(filteredDiaries, null, 2)], {
+      type: "application/json",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${user?.name}-${new Date().toLocaleDateString("en-IN", { dateStyle: "short" })}.json`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
-  const handleDiaryChange = (e: React.MouseEvent, oldId: string | null, newId: string) => {
-    const OldDiary = diaries.find((d) => d._id === oldId)
-    if (OldDiary && !OldDiary?.content && !OldDiary?.title){
-      onDelete(e, oldId!)
+  const handleDiaryChange = (
+    e: React.MouseEvent,
+    oldId: string | null,
+    newId: string,
+  ) => {
+    if (!isSaving) {
+      const OldDiary = diaries.find((d) => d._id === oldId);
+      if (OldDiary && !OldDiary?.content && !OldDiary?.title) {
+        onDelete(e, oldId!);
+      }
+      onSelect(newId);
     }
-    onSelect(newId)
-  }
+  };
 
   if (!isOpen) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="border mt-4 ml-4 p-3 rounded-full bg-(--muted)/15 hover:bg-(--muted)/20 cursor-pointer"
+        className="border-0 mt-4 ml-4 p-3 rounded-full bg-(--muted)/15 hover:bg-(--muted)/20 cursor-pointer"
         title="Open DiarySidebar"
       >
-        <Menu size={24} />
+        <PanelRightClose size={24} />
       </button>
     );
   }
@@ -98,7 +135,7 @@ const DiarySidebar: React.FC<SidebarProps> = ({
   return (
     <div
       id="diary_H"
-      className="w-80 h-full flex flex-col border-r border-(--muted)/50 "
+      className="w-80 h-full flex flex-col border-r border-(--muted)/50 transition-all duration-300 ease-in-out"
     >
       <div className="p-4 border-b-2 border-(--muted)/50 flex justify-between items-center">
         <h2 className="text-2xl font-bold">My Diaries</h2>
@@ -112,7 +149,7 @@ const DiarySidebar: React.FC<SidebarProps> = ({
       </div>
       {isLoading ? (
         <div className="h-full flex justify-center items-center">
-          <LoadingSpinner text="Diaries"/>
+          <LoadingSpinner text="Diaries" />
         </div>
       ) : (
         <>
@@ -174,12 +211,12 @@ const DiarySidebar: React.FC<SidebarProps> = ({
           </div>
 
           <div className="p-2 pt-5 overflow-y-auto flex-1 sidebar-scroll ">
-            {displayedDiaries.length === 0 ? (
+            {displayedDiaries && displayedDiaries?.length === 0 ? (
               <div className="h-full flex items-center justify-center text-center p-4 opacity-50 text-md">
                 No entries yet. Click + to start.
               </div>
             ) : (
-              displayedDiaries.map((diary) => (
+              displayedDiaries?.map((diary) => (
                 <div
                   key={diary._id}
                   id={`H-${diary._id}`}
@@ -196,18 +233,26 @@ const DiarySidebar: React.FC<SidebarProps> = ({
                       {diary.title || "Untitled Entry"}
                     </h3>
                     <p className="text-xs opacity-60 truncate">
-                      {new Date(diary.createdAt).toLocaleDateString()}
+                      {new Date(diary.createdAt).toLocaleDateString("en-IN", {
+                        dateStyle: "medium",
+                      })}
                     </p>
                   </div>
                   <button
-                    onClick={(e) => console.log('pin button clicked')}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 transition-all"
-                    title="Delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdate({ ...diary, pinned: !diary.pinned });
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 transition-all hover:bg-white/20 rounded"
+                    title={diary.pinned ? "Unpin" : "Pin"}
                   >
-                    <Pin size={20} />
+                    {diary.pinned ? <PinOff size={20} /> : <Pin size={20} />}
                   </button>
                   <button
-                    onClick={(e) => onDelete(e, diary._id!)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(e, diary._id!);
+                    }}
                     className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/20 rounded text-red-500 transition-all"
                     title="Delete"
                   >
@@ -223,5 +268,4 @@ const DiarySidebar: React.FC<SidebarProps> = ({
   );
 };
 
-// export default React.memo(DiarySidebar);I
 export default DiarySidebar;

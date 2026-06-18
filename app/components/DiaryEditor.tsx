@@ -3,33 +3,28 @@ import React, { useState, useEffect } from "react";
 import { IDiary } from "../diary/page";
 import DiaryDatePicker from "./DiaryDatePicker";
 
-
 interface DiaryEditorProps {
   diary: IDiary;
   onUpdate: (updated: IDiary) => void;
+  isSaving: Boolean;
 }
 
-const DiaryEditor: React.FC<DiaryEditorProps> = ({ diary, onUpdate }) => {
+const DiaryEditor: React.FC<DiaryEditorProps> = ({ diary, onUpdate, isSaving }) => {
   const [title, setTitle] = useState(diary.title);
   const [content, setContent] = useState(diary.content);
-  const [isSaving, setIsSaving] = useState(false);
 
-  // Sync state when selected diary changes
   useEffect(() => {
     setTitle(diary.title);
     setContent(diary.content);
   }, [diary._id]);
 
 
-  // Simple debounce for auto-save effect or just save on blur/change
   useEffect(() => {
     const timer = setTimeout(() => {
       if (title !== diary.title || content !== diary.content) {
-        // setIsSaving(true)
         onUpdate({ ...diary, title, content });
-        // setIsSaving(false)
       }
-    }, 3000);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [title, content]);
@@ -42,10 +37,9 @@ const DiaryEditor: React.FC<DiaryEditorProps> = ({ diary, onUpdate }) => {
         <input
           type="text"
           value={title}
-          title="Diary Title"
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Entry Title..."
-          className="ml-5 text-3xl font-bold bg-transparent border-none outline-none w-full placeholder-muted"
+          placeholder="Untitled"
+          className="ml-5 text-3xl font-bold bg-transparent border-none outline-none w-full"
         />
         <div className="text-sm font-semibold opacity-50 whitespace-nowrap">
           {isSaving ? "Saving..." : "Saved"}
@@ -53,11 +47,10 @@ const DiaryEditor: React.FC<DiaryEditorProps> = ({ diary, onUpdate }) => {
       </div>
 
       <textarea
-        //   title="Diary Content"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="Dear Diary..."
-        className="flex-1 w-full bg-transparent border-none outline-none resize-none text-lg leading-relaxed placeholder-muted p-2"
+        placeholder="Start writing..."
+        className="flex-1 w-full bg-transparent border-none outline-none resize-none text-lg leading-relaxed p-2"
         spellCheck={true}
       />
 

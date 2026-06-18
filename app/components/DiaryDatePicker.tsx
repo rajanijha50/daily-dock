@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -6,27 +6,35 @@ import {
 } from "lucide-react";
 import { IDiary } from "../diary/page";
 
-
 interface DatePickerProps {
-  //   selectedDate?: Date | null;
-  //   onChange?: (date: Date) => void;
   diary: IDiary;
   onUpdate: (updated: IDiary) => void;
 }
 
-export default function DiaryDatePicker({
-  //   selectedDate: initialDate,
-  //   onChange,
-  diary,
-  onUpdate,
-}: DatePickerProps) {
+export default function DiaryDatePicker({ diary, onUpdate }: DatePickerProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(
-    new Date(diary.createdAt) || null
+    new Date(diary.createdAt) || null,
   );
   const [viewDate, setViewDate] = useState<Date>(
-    new Date(diary.createdAt)|| new Date()
+    new Date(diary.createdAt) || new Date(),
   );
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(e.target as Node)
+        ) {
+          toggleCalendar()
+        }
+      };
+  
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
   useEffect(() => {
     if (diary.createdAt) {
@@ -40,7 +48,6 @@ export default function DiaryDatePicker({
     setSelectedDate(newDate);
     onUpdate({ ...diary, createdAt: newDate, modifiedAt: new Date() });
     setIsOpen(false);
-
   };
 
   const handlePrevMonth = (e: React.MouseEvent) => {
@@ -88,14 +95,18 @@ export default function DiaryDatePicker({
   ];
 
   return (
-    <div className="relative max-w-75" title="Date Created">
+    <div ref={containerRef} className="relative max-w-75" title="Date Created">
       <div
         className="flex justify-center items-center rounded-lg border text-muted px-3 py-2 shadow-sm cursor-pointer border-muted/50 hover:border-muted transition-colors"
         onClick={toggleCalendar}
       >
-        <CalendarIcon size={18} className="mr-2" />
-        <span className={``}>
-          {selectedDate ? selectedDate.toLocaleDateString() : "Pick a date"}
+        <CalendarIcon size={18} className="mr-2 text-primary dark:text-foreground" />
+        <span className="w-full text-nowrap text-primary dark:text-foreground">
+          {selectedDate
+            ? selectedDate.toLocaleDateString("en-IN", {
+                dateStyle: "medium",
+              })
+            : "Pick a date"}
         </span>
       </div>
 
@@ -121,10 +132,7 @@ export default function DiaryDatePicker({
 
           <div className="grid grid-cols-7 mb-2 text-center">
             {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
-              <span
-                key={d}
-                className="text-xs font-medium text-muted/50"
-              >
+              <span key={d} className="text-xs font-medium text-muted/50">
                 {d}
               </span>
             ))}
@@ -148,7 +156,9 @@ export default function DiaryDatePicker({
                 <button
                   key={i}
                   onClick={() => handleDateClick(day)}
-                  title={isToday ? 'Today' : String(day) + ' ' + monthNames[month]}
+                  title={
+                    isToday ? "Today" : String(day) + " " + monthNames[month]
+                  }
                   className={`
                     w-10 h-10 rounded-full flex items-center justify-center transition-all
                     ${

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         if (!alreadyExist || alreadyExist == null) {
             return NextResponse.json({ message: "couldn't get data for this user, because user with this email doesn't exist", status: 404 })
         }
-        const NoteData = await NoteModel.find({ user_email: user_email })
+        const NoteData = await NoteModel.find({ user_email: user_email }).sort({ pinned: -1, createdAt: -1 })
         return NextResponse.json({ message: "List of all notes", data: NoteData })
     } catch (error) {
         console.log(error)
@@ -63,7 +63,7 @@ export async function PUT(request: NextRequest) {
     if (!note._id) {
         return NextResponse.json({ message: "Note ID is required" })
     }
-    if (!note.title && !note.content && !note.category) {
+    if (!note.title && !note.content && !note.category && !note.pinned) {
         return NextResponse.json({ message: "No fields provided to update" })
     }
     try {
@@ -72,6 +72,7 @@ export async function PUT(request: NextRequest) {
             title: note?.title,
             content: note?.content,
             category: note?.category,
+            pinned: note?.pinned,
             modifiedAt: new Date()
         }, { new: true })
 
