@@ -1,6 +1,6 @@
-// components/hero.tsx
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 export default function LandingPage() {
   return (
@@ -24,12 +24,9 @@ export default function LandingPage() {
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button size="lg" className="text-white rounded-lg px-6 hover:scale-105 transition-transform duration-200">
+        <Link href="/login" className="text-white bg-primary rounded-lg px-8 py-3 hover:scale-105 transition-transform duration-200">
           Get started — it's free
-        </Button>
-        {/* <Button size="lg" variant="outline" className="rounded-lg px-6">
-          See how it works →
-        </Button> */}
+        </Link>
       </div>
 
 

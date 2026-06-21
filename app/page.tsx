@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <div className="handle-scroll font-poppins flex flex-col min-h-screen bg-foreground dark:bg-background text-primary dark:text-foreground">
       <Header />
-      {isLoggedIn ? <Hero /> : <LandingPage />}
+      {isLoggedIn ? <Hero userName={user.name} /> : <LandingPage />}
       <Footer/>
     </div>
   );

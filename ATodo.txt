@@ -1,4 +1,0 @@
-- fix the timer issue on navbar, it should be synchronized with every page, showing the same time
-- sound notifications in timer page
-- web activity tracking for all web pages on the current browser
-- daily streak

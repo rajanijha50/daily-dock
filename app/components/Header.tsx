@@ -2,11 +2,19 @@
 import { useState, useRef, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { Menu, Pause, Play, RotateCcw, Timer, X, Flame, ExternalLink } from "lucide-react";
+import {
+  Menu,
+  Pause,
+  Play,
+  RotateCcw,
+  Timer,
+  X,
+  Flame,
+  ExternalLink,
+} from "lucide-react";
 import { ModeToggle } from "@/components/ui/theme";
 import { timerStore } from "../store/timerStore";
 import { userStore } from "../store/userStore";
-
 
 type UserType = {
   name?: string | null | undefined;
@@ -39,7 +47,7 @@ const UserProfile = ({ name, email, image }: UserType) => {
   };
 
   return (
-    <div ref={containerRef} className="relative inline-block mr-3">
+    <div ref={containerRef} className="relative inline-block mx-auto">
       {/* Trigger button */}
       <button
         onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -60,7 +68,7 @@ const UserProfile = ({ name, email, image }: UserType) => {
       {isDropdownOpen && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-36 rounded-md border border-white/20 bg-neutral-900 shadow-lg z-20 overflow-hidden"
+          className="absolute right-0 mt-2 w-36 rounded-md border border-border bg-primary text-foreground shadow-lg z-50 overflow-hidden"
         >
           <Link
             role="menuitem"
@@ -99,7 +107,7 @@ const TimerStatus = () => {
   const alarmRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    alarmRef.current = new Audio('/audio/notification_sound.mp3');
+    alarmRef.current = new Audio("/audio/notification_sound.mp3");
   }, []);
 
   useEffect(() => {
@@ -125,8 +133,8 @@ const TimerStatus = () => {
     if (prevModeRef.current !== mode) {
       // If the timer was active and the mode changed, it means a session completed
       if (isActive && alarmRef.current) {
-        console.log('playing...')
-        alarmRef.current.play().catch(err => {
+        console.log("playing...");
+        alarmRef.current.play().catch((err) => {
           console.warn("Audio play blocked by browser autoplay policy:", err);
         });
       }
@@ -183,8 +191,12 @@ const TimerStatus = () => {
               >
                 <RotateCcw size={20} />
               </button>
-              <Link href = {'/timer'} title="Open in Page" className="hover:bg-white/20 p-1.5 rounded-full">
-                <ExternalLink size={20}/>
+              <Link
+                href={"/timer"}
+                title="Open in Page"
+                className="hover:bg-white/20 p-1.5 rounded-full"
+              >
+                <ExternalLink size={20} />
               </Link>
             </div>
           </div>
@@ -205,7 +217,7 @@ const Header = () => {
     maxStreak,
     lastLoginDate,
     setUser: setStoredUser,
-    clearUser
+    clearUser,
   } = userStore();
 
   const getTodayString = () => {
@@ -216,7 +228,10 @@ const Header = () => {
     return `${year}-${month}-${day}`;
   };
 
-  const fetchUserState = async (emailId: string | undefined, todayStr: string) => {
+  const fetchUserState = async (
+    emailId: string | undefined,
+    todayStr: string,
+  ) => {
     if (!emailId) return;
     try {
       // 1. Update streak via PUT
@@ -283,8 +298,6 @@ const Header = () => {
   }, [session, lastLoginDate]);
 
   const pages = [
-    // { name: "home", href: "/" },
-    // { name: "about", href: "/about" },
     { name: "diary", href: "/diary" },
     { name: "todos", href: "/todo" },
     { name: "notes", href: "/note" },
@@ -338,7 +351,7 @@ const Header = () => {
               ) : (
                 <Link
                   href="/login"
-                  className="ml-4 px-6 py-2.5 bg-secondary dark:bg-primary text-primary-foreground dark:text-white text-sm font-medium rounded-full transition-all duration-300 hover:bg-primary/90 hover:shadow-lg hover:scale-105"
+                  className="ml-4 px-6 py-2.5 bg-accent text-foreground text-sm font-medium rounded-full transition-all duration-300 hover:bg-accent/90 hover:shadow-lg hover:scale-105"
                 >
                   Get Started
                 </Link>
@@ -349,7 +362,7 @@ const Header = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+              className="md:hidden p-2 transition-colors"
               aria-label="Toggle menu"
             >
               {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -363,36 +376,35 @@ const Header = () => {
             menuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          <div className="px-6 pt-2 pb-6 bg-background border-t border-border">
-            <div className="flex flex-col gap-2">
-              {pages.map((page, index) => (
-                <Link
-                  key={page.name}
-                  href={page.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="px-4 py-3 text-base font-medium text-muted-foreground capitalize rounded-lg transition-all duration-200 hover:bg-accent/20 hover:text-foreground hover:pl-6"
-                >
-                  {page.name}
-                </Link>
-              ))}
-              {isLoggedIn ? (
+          <div className="flex flex-col items-center px-6 pt-2 pb-6 backdrop-blur-lg border-t border-border">
+            {pages.map((page) => (
+              <Link
+                key={page.name}
+                href={page.href}
+                onClick={() => setMenuOpen(false)}
+                className="w-full px-4 py-3 text-center font-medium capitalize rounded-lg transition-all duration-200 hover:bg-accent/20"
+              >
+                {page.name}
+              </Link>
+            ))}
+            {isLoggedIn ? (
+              <div className="px-4 py-3 w-full flex justify-center items-center">
                 <UserProfile
                   name={user?.name}
                   email={user?.email}
                   image={user?.image}
                 />
-              ) : (
-                <Link
-                  href="/login"
-                  className="mt-2 px-4 py-3 bg-primary text-primary-foreground text-base font-medium rounded-lg transition-all duration-200 hover:bg-primary/90"
-                >
-                  Get Started
-                </Link>
-              )}
-              <div className="flex justify-start mt-2">
-                <ModeToggle />
               </div>
-            </div>
+            ) : (
+              <Link
+                href="/login"
+                className="my-2 px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 bg-accent text-foreground hover:bg-muted"
+              >
+                Get Started
+              </Link>
+            )}
+
+            <ModeToggle />
           </div>
         </div>
       </header>
