@@ -1,40 +1,50 @@
 export type UserType = {
-    // _id: string;
-    name: string;
-    email: string;
-    password?: string;
-    avatar?: string;
-    currentStreak?: number;
-    maxStreak?: number;
-    lastLogin?: Date;
-    createdAt: Date;
-}
+  name: string;
+  email: string;
+  password?: string;
+  avatar?: string;
+  currentStreak?: number;
+  maxStreak?: number;
+  lastLogin?: Date;
+  createdAt: Date;
+};
 
 export interface NoteType {
-    user_email: string;
-    title?: string;
-    content?: string;
-    category?: string;
-    pinned?: boolean;
-    createdAt: Date;
-    modifiedAt: Date;
+  user_email: string;
+  title?: string;
+  content?: string;
+  category?: string;
+  pinned?: boolean;
+  createdAt: Date;
+  modifiedAt: Date;
 }
 
 export interface DiaryType {
-    user_email: string;
-    title?: string;
-    content?: string;
-    pinned?: boolean;
-    createdAt: Date;
-    modifiedAt: Date;
+  user_email: string;
+  title?: string;
+  content?: string;
+  pinned?: boolean;
+  createdAt: Date;
+  modifiedAt: Date;
 }
 
 export interface TodoType {
-    // user_id: ObjectId;
-    user_email: string;
-    content: string;
-    category?: string;
-    status: "not-started" | "in-progress" | "completed";
-    createdAt: Date;
-    modifiedAt: Date;
+  user_email: string;
+  content: string;
+  category?: string;
+  status: "not-started" | "in-progress" | "completed";
+  createdAt: Date;
+  modifiedAt: Date;
+}
+
+export interface TimerType {
+  user_email: string;
+  status: "running" | "paused" | "not-started" | "completed";
+  started_at: Date;
+  duration: number;
+  paused_at: Date | null;
+  maxCycles: number;
+  currentCycle: number;
+  createdAt: Date;
+  modifiedAt: Date;
 }
