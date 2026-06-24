@@ -34,8 +34,10 @@ export default function TodoPage() {
 
   // Fetch Todos
   useEffect(() => {
-    fetchTodos();
-  }, []);
+    if (user?.email) {
+      fetchTodos();
+    }
+  }, [user?.email]);
 
   // NOTE: CRUD Operations
   const fetchTodos = async () => {
@@ -129,7 +131,7 @@ export default function TodoPage() {
 
 
   const filterTodoByStatus = (status: TodoStatus) =>
-    todos.filter((t) => t.status === status);
+    todos?.filter((t) => t.status === status);
 
   return (
     <div className="page-layout handle-scroll">

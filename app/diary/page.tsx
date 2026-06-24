@@ -24,8 +24,10 @@ const DiaryApp = () => {
   const { user } = userStore();
 
   useEffect(() => {
-    fetchDiaries();
-  }, []);
+    if (user?.email) {
+      fetchDiaries();
+    }
+  }, [user?.email]);
 
   // Fetch Diaries
   const fetchDiaries = async () => {

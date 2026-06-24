@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Plus, FileText, Trash2, Pin, PinOff } from "lucide-react";
+import { LuPlus, LuFileText, LuTrash2, LuPin, LuPinOff } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import NoteEditor from "../components/NoteEditor";
@@ -29,8 +29,10 @@ export default function NotePage() {
   const { user } = userStore();
 
   useEffect(() => {
-    fetchNotes();
-  }, []);
+    if (user?.email) {
+      fetchNotes();
+    }
+  }, [user?.email]);
 
   const fetchNotes = async () => {
     try {
@@ -114,7 +116,7 @@ export default function NotePage() {
             </div>
           ) : notes?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32">
-              <FileText size={40} className="mb-4 opacity-40" />
+              <LuFileText size={40} className="mb-4 opacity-40" />
               <p className="text-lg">No notes yet.</p>
               <p className="text-sm mt-1">Click "+" to get started.</p>
             </div>
@@ -123,7 +125,7 @@ export default function NotePage() {
               {notes?.map((note) => (
                 <Card
                   key={note._id}
-                  className="h-64 text-primary bg-muted/50 dark:bg-accent/50 hover:dark:bg-accent dark:text-foreground border border-border rounded-lg p-4 hover:shadow-md hover:bg-muted transition-all delay-100 duration-200 group hover:scale-102 flex flex-col justify-start"
+                  className="h-64 text-primary bg-muted/50 dark:bg-accent/50 hover:dark:bg-accent dark:text-foreground border border-border rounded-lg p-4 hover:shadow-md hover:bg-accent/40 transition-all delay-100 duration-200 group hover:scale-102 flex flex-col justify-start"
                   onClick={() => {
                     setActiveNote(note);
                     setOpenEditor(true);
@@ -154,7 +156,7 @@ export default function NotePage() {
                           handleUpdateNote({ ...note, pinned: !note.pinned });
                         }}
                       >
-                        {note.pinned ? <PinOff size={20} /> : <Pin size={20} />}
+                        {note.pinned ? <LuPinOff size={20} /> : <LuPin size={20} />}
                       </button>
                       <button
                         className="p-1.5 transition-all hover:bg-destructive/20 text-destructive rounded"
@@ -163,7 +165,7 @@ export default function NotePage() {
                           handleDeleteNote(note._id!);
                         }}
                       >
-                        <Trash2 size={20} />
+                        <LuTrash2 size={20} />
                       </button>
                     </div>
                   </div>
@@ -177,7 +179,7 @@ export default function NotePage() {
               onClick={handleNewNote}
               className="p-5 rounded-full text-4xl bg-muted text-primary-foreground dark:bg-primary dark:text-white hover:bg-accent hover:dark:bg-primary/80 cursor-default"
             >
-              <Plus size={35} />
+              <LuPlus size={35} />
             </button>
           </div>
         </main>

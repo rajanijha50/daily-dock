@@ -2,19 +2,11 @@
 import { useState, useRef, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import {
-  Menu,
-  Pause,
-  Play,
-  RotateCcw,
-  Timer,
-  X,
-  Flame,
-  ExternalLink,
-} from "lucide-react";
+import { LuMenu, LuPause, LuPlay, LuRotateCcw, LuTimer, LuX, LuFlame, LuExternalLink } from "react-icons/lu";
 import { ModeToggle } from "@/components/ui/theme";
 import { timerStore } from "../store/timerStore";
 import { userStore } from "../store/userStore";
+import { useRouter } from "next/navigation";
 
 type UserType = {
   name?: string | null | undefined;
@@ -25,8 +17,10 @@ type UserType = {
 const UserProfile = ({ name, email, image }: UserType) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { clearUser } = userStore();
+  const router = useRouter();
 
-  // Close dropdown when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -41,14 +35,16 @@ const UserProfile = ({ name, email, image }: UserType) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = async () => {
     setIsDropdownOpen(false);
+    await signOut({redirect: false})
+    clearUser();
+    router.push('/');
   };
 
   return (
     <div ref={containerRef} className="relative inline-block mx-auto">
-      {/* Trigger button */}
+      
       <button
         onClick={() => setIsDropdownOpen((prev) => !prev)}
         aria-expanded={isDropdownOpen}
@@ -64,7 +60,7 @@ const UserProfile = ({ name, email, image }: UserType) => {
         )}
       </button>
 
-      {/* Dropdown menu */}
+      
       {isDropdownOpen && (
         <div
           role="menu"
@@ -74,7 +70,7 @@ const UserProfile = ({ name, email, image }: UserType) => {
             role="menuitem"
             href="/settings"
             onClick={() => setIsDropdownOpen(false)}
-            className="block px-4 py-2 text-sm capitalize hover:bg-white/20 transition-colors"
+            className="hidden px-4 py-2 text-sm capitalize hover:bg-white/20 transition-colors"
           >
             Settings
           </Link>
@@ -131,16 +127,13 @@ const TimerStatus = () => {
 
   useEffect(() => {
     if (prevModeRef.current !== mode) {
-      // If the timer was active and the mode changed, it means a session completed
       if (isActive && alarmRef.current) {
-        console.log("playing...");
         alarmRef.current.play().catch((err) => {
           console.warn("Audio play blocked by browser autoplay policy:", err);
         });
       }
       prevModeRef.current = mode;
     } else if (!isActive && alarmRef.current) {
-      // Pause alarm if timer is paused
       alarmRef.current.pause();
       alarmRef.current.currentTime = 0;
     }
@@ -159,7 +152,7 @@ const TimerStatus = () => {
           onMouseEnter={() => setHovered(true)}
           className="px-5 py-2 text-sm font-medium capitalize transition-all duration-200"
         >
-          <Timer size={20} />
+          <LuTimer size={20} />
         </button>
         {hovered && (
           <div
@@ -182,21 +175,21 @@ const TimerStatus = () => {
                 onClick={toggleTimer}
                 title={isActive ? "Pause" : "Start"}
               >
-                {isActive ? <Pause size={20} /> : <Play size={20} />}
+                {isActive ? <LuPause size={20} /> : <LuPlay size={20} />}
               </button>
               <button
                 className="hover:bg-white/20 p-1.5 rounded-full"
                 onClick={resetTimer}
                 title="Reset"
               >
-                <RotateCcw size={20} />
+                <LuRotateCcw size={20} />
               </button>
               <Link
                 href={"/timer"}
                 title="Open in Page"
                 className="hover:bg-white/20 p-1.5 rounded-full"
               >
-                <ExternalLink size={20} />
+                <LuExternalLink size={20} />
               </Link>
             </div>
           </div>
@@ -209,32 +202,30 @@ const TimerStatus = () => {
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: session, status } = useSession();
-  // console.log(session)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<UserType>();
   const {
+    user: storedUser,
     currentStreak,
-    maxStreak,
     lastLoginDate,
     setUser: setStoredUser,
     clearUser,
   } = userStore();
 
-  const getTodayString = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
+  const getLocalDateString = (dateInput?: Date | string | null) => {
+    if (!dateInput) return "";
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return "";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
   const fetchUserState = async (
-    emailId: string | undefined,
-    todayStr: string,
+    emailId: string | undefined
   ) => {
     if (!emailId) return;
     try {
-      // 1. Update streak via PUT
       const updateRes = await fetch("/api/user/streak", {
         method: "PUT",
         headers: {
@@ -245,62 +236,59 @@ const Header = () => {
         }),
       });
       const updateData = await updateRes.json();
-
-      // 2. Fetch updated streak details via GET
-      const getRes = await fetch(`/api/user/streak?emailId=${emailId}`);
-      const getData = await getRes.json();
-
-      if (getData?.success) {
-        setStoredUser({
-          user: {
-            name: session?.user?.name || "",
-            email: session?.user?.email || "",
-            image: session?.user?.image || "",
-          },
-          currentStreak: getData.data.currentStreak,
-          maxStreak: getData.data.maxStreak,
-          lastLoginDate: todayStr,
-        });
-      } else if (updateData?.success) {
-        // Fallback to update response if GET fails
-        setStoredUser({
-          user: {
-            name: session?.user?.name || "",
-            email: session?.user?.email || "",
-            image: session?.user?.image || "",
-          },
-          currentStreak: updateData.data.currentStreak,
-          maxStreak: updateData.data.maxStreak,
-          lastLoginDate: todayStr,
-        });
-      }
+      setStoredUser({
+        ...storedUser,
+        currentStreak: updateData.data.currentStreak,
+        maxStreak: updateData.data.maxStreak,
+        lastLoginDate: updateData.data.lastLogin,
+      });
     } catch (error) {
       console.log("Header update/fetch user state error: ", error);
     }
   };
 
   useEffect(() => {
+    if (status === "loading") return;
+ 
     if (session && session?.user) {
-      setUser(session.user);
       setIsLoggedIn(true);
 
       const email = session.user.email ?? undefined;
-      const todayStr = getTodayString();
+      const todayDateStr = getLocalDateString(new Date());
+      const lastLoginDateStr = getLocalDateString(lastLoginDate);
 
-      // Only call to fetch user state if the last login date is not the same as current date
-      if (lastLoginDate !== todayStr) {
-        fetchUserState(email, todayStr);
+      if (
+        storedUser?.email !== email ||
+        storedUser?.name !== session.user.name ||
+        storedUser?.image !== session.user.image
+      ) {
+        // console.log("updating the userstore")
+        setStoredUser({
+          user: {
+            name: session.user.name!,
+            email: session.user.email!,
+            image: session.user.image || null,
+          },
+        });
+      }
+
+      if (lastLoginDateStr !== todayDateStr) {
+        // console.log("updating the streak")
+        fetchUserState(email);
       }
     } else {
       setIsLoggedIn(false);
-      clearUser();
+      if (storedUser?.email) {
+        clearUser();
+      }
     }
-  }, [session, lastLoginDate]);
+  }, [session, status, lastLoginDate]);
 
   const pages = [
     { name: "diary", href: "/diary" },
     { name: "todos", href: "/todo" },
     { name: "notes", href: "/note" },
+    { name: "pomodoro", href: "/timer" },
   ];
 
   return (
@@ -308,7 +296,7 @@ const Header = () => {
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-border animate-fade-in">
         <nav className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-15">
-            {/* Logo */}
+            
             <Link href="/" className="group relative">
               <span className="text-2xl font-light tracking-tight transition-all duration-300 group-hover:tracking-wide">
                 Daily Dock
@@ -316,7 +304,6 @@ const Header = () => {
               <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary dark:bg-muted-foreground transition-all duration-300 group-hover:w-full"></div>
             </Link>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-1">
               {pages.map((page) => (
                 <Link
@@ -334,19 +321,19 @@ const Header = () => {
                   className="flex items-center gap-1 px-3 py-1 bg-orange-500/10 text-orange-500 rounded-full border border-orange-500/20"
                   title={`Current Streak: ${currentStreak}`}
                 >
-                  <Flame size={18} className="fill-orange-500" />
+                  <LuFlame size={18} className="fill-orange-500" />
                   <span className="text-xs font-bold">{currentStreak}</span>
                 </div>
               )}
 
-              <TimerStatus />
+              {isLoggedIn && (<TimerStatus />)}
 
-              {/* CTA Button */}
+              
               {isLoggedIn ? (
                 <UserProfile
-                  name={user?.name}
-                  email={user?.email}
-                  image={user?.image}
+                  name={storedUser?.name}
+                  email={storedUser?.email}
+                  image={storedUser?.image}
                 />
               ) : (
                 <Link
@@ -359,18 +346,17 @@ const Header = () => {
               <ModeToggle />
             </div>
 
-            {/* Mobile Menu Button */}
+            
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="md:hidden p-2 transition-colors"
               aria-label="Toggle menu"
             >
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+              {menuOpen ? <LuX size={24} /> : <LuMenu size={24} />}
             </button>
           </div>
         </nav>
 
-        {/* Mobile Navigation */}
         <div
           className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
             menuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
@@ -390,9 +376,9 @@ const Header = () => {
             {isLoggedIn ? (
               <div className="px-4 py-3 w-full flex justify-center items-center">
                 <UserProfile
-                  name={user?.name}
-                  email={user?.email}
-                  image={user?.image}
+                  name={storedUser?.name}
+                  email={storedUser?.email}
+                  image={storedUser?.image}
                 />
               </div>
             ) : (
@@ -409,7 +395,6 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Spacer to prevent content from hiding under fixed header */}
       <div className="h-15"></div>
     </>
   );

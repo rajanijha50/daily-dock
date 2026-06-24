@@ -6,11 +6,11 @@ interface UserState {
     user: {
         name: string;
         email: string;
-        image?: string;
+        image: string | null;
     }
     currentStreak: number;
     maxStreak: number;
-    lastLoginDate?: string; // stored as 'YYYY-MM-DD'
+    lastLoginDate?: Date | null;
     setUser: (user: Partial<Omit<UserState, 'setUser' | 'clearUser'>>) => void;
     clearUser: () => void;
 }
@@ -22,22 +22,22 @@ export const userStore = create<UserState>()(
                 user: {
                     name: '',
                     email: '',
-                    image: '',
+                    image: null,
                 },
                 currentStreak: 0,
                 maxStreak: 0,
-                lastLoginDate: '',
+                lastLoginDate: null,
 
                 setUser: (user) => set((state) => ({ ...state, ...user })),
                 clearUser: () => set({
                     user: {
                         name: '',
                         email: '',
-                        image: '',
+                        image: null,
                     },
                     currentStreak: 0,
                     maxStreak: 0,
-                    lastLoginDate: ''
+                    lastLoginDate: null
                 })
             }),
             { name: 'user-sync' }
