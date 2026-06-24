@@ -5,7 +5,7 @@ import Weather from "./Weather";
 const Hero = ({userName}: {userName: string}) => {
 
   return (
-    <div className="w-screen flex flex-col justify-center gap-5 items-center rounded-md min-h-200">
+    <div className=" flex flex-col justify-center gap-5 items-center rounded-md min-h-200">
       <h2 className="p-5 w-full text-left font-semibold font-mono text-4xl">
         Hello, {userName}
       </h2>

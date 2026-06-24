@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { INote } from "@/app/note/page";
 import { Button } from "@/components/ui/button";
-import { X, Trash2, PinOff, Pin } from "lucide-react";
+import { LuX, LuTrash2, LuPinOff, LuPin } from "react-icons/lu";
 
 interface NoteEditorProps {
   note: INote;
@@ -94,7 +94,7 @@ export default function NoteEditor({
             onClick={() => {setPinned(!pinned)}}
             className={`bg-transparent text-foreground hover:bg-white/20`}
           >
-            {pinned ? <PinOff size={16} /> : <Pin size={16} />}
+            {pinned ? <LuPinOff size={16} /> : <LuPin size={16} />}
           </Button>
           <Button
             variant="default"
@@ -102,7 +102,7 @@ export default function NoteEditor({
             onClick={() => onDelete(note._id!)}
             className="text-red-600 bg-transparent hover:bg-red-500/10"
           >
-            <Trash2 size={16} />
+            <LuTrash2 size={16} />
           </Button>
           <Button
             variant="default"
@@ -110,7 +110,7 @@ export default function NoteEditor({
             onClick={onClose}
             className="bg-transparent text-foreground hover:bg-red-500/20"
           >
-            <X size={18} />
+            <LuX size={18} />
           </Button>
         </div>
       </div>

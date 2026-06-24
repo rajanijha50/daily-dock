@@ -1,14 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import {
-  Download,
-  PanelRightClose,
-  Pin,
-  PinOff,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+  LuDownload,
+  LuPanelRightClose,
+  LuPin,
+  LuPinOff,
+  LuPlus,
+  LuTrash2,
+  LuX,
+} from "react-icons/lu";
 import LoadingSpinner from "./LoadingSpinner";
 import { IDiary } from "../diary/page";
 import { userStore } from "../store/userStore";
@@ -127,7 +127,7 @@ const DiarySidebar: React.FC<SidebarProps> = ({
         className="border-0 mt-4 ml-4 p-3 rounded-full bg-(--muted)/15 hover:bg-(--muted)/20 cursor-pointer"
         title="Open DiarySidebar"
       >
-        <PanelRightClose size={24} />
+        <LuPanelRightClose size={24} />
       </button>
     );
   }
@@ -144,7 +144,7 @@ const DiarySidebar: React.FC<SidebarProps> = ({
           className="p-2 rounded-full hover:bg-(--muted)/20 transition-colors cursor-pointer"
           title="Close DiarySidebar"
         >
-          <X size={25} />
+          <LuX size={25} />
         </button>
       </div>
       {isLoading ? (
@@ -198,14 +198,14 @@ const DiarySidebar: React.FC<SidebarProps> = ({
                 className="p-2 rounded-full hover:bg-(--muted)/20 transition-colors cursor-pointer"
                 title="Export"
               >
-                <Download size={25} />
+                <LuDownload size={25} />
               </button>
               <button
                 onClick={onNew}
                 className="p-2 rounded-full hover:bg-(--muted)/20 transition-colors cursor-pointer"
                 title="New Entry"
               >
-                <Plus size={25} />
+                <LuPlus size={25} />
               </button>
             </div>
           </div>
@@ -246,7 +246,7 @@ const DiarySidebar: React.FC<SidebarProps> = ({
                     className="opacity-0 group-hover:opacity-100 p-1.5 transition-all hover:bg-white/20 rounded"
                     title={diary.pinned ? "Unpin" : "Pin"}
                   >
-                    {diary.pinned ? <PinOff size={20} /> : <Pin size={20} />}
+                    {diary.pinned ? <LuPinOff size={20} /> : <LuPin size={20} />}
                   </button>
                   <button
                     onClick={(e) => {
@@ -256,7 +256,7 @@ const DiarySidebar: React.FC<SidebarProps> = ({
                     className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/20 rounded text-red-500 transition-all"
                     title="Delete"
                   >
-                    <Trash2 size={20} />
+                    <LuTrash2 size={20} />
                   </button>
                 </div>
               ))

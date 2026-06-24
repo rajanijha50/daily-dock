@@ -1,5 +1,5 @@
 "use client";
-import { Cog, Pause, Play, RotateCcw, Trash2 } from "lucide-react";
+import { LuCog, LuPause, LuPlay, LuRotateCcw, LuTrash2 } from "react-icons/lu";
 import { useState, useEffect, useRef } from "react";
 import Header from "../components/Header";
 import { userStore } from "../store/userStore";
@@ -180,22 +180,22 @@ const Timer = () => {
             onClick={toggleTimer}
           >
             {isActive ? (
-              <Pause size={24} className="text-white" />
+              <LuPause size={24} className="text-white" />
             ) : (
-              <Play size={24} className="pl-1 text-white" />
+              <LuPlay size={24} className="pl-1 text-white" />
             )}
           </button>
           <button
             className={`p-5 rounded-2xl ${mode === "pomodoro" ? "bg-blue-500 hover:bg-blue-700" : "bg-green-500 hover:bg-green-700"} hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-xl`}
             onClick={resetTimer}
           >
-            <RotateCcw size={24} className="text-white" />
+            <LuRotateCcw size={24} className="text-white" />
           </button>
           <button
             className={`p-5 rounded-2xl ${mode === "pomodoro" ? "bg-blue-500 hover:bg-blue-700" : "bg-green-500 hover:bg-green-700"} hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-xl`}
             onClick={() => setShowSettings(true)}
           >
-            <Cog size={24} className="text-white" />
+            <LuCog size={24} className="text-white" />
           </button>
         </div>
 
@@ -435,7 +435,7 @@ const TimerHistory = ({ email }: TimerHistoryProps) => {
                   className="p-2 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200"
                   title="Delete from history"
                 >
-                  <Trash2 size={16} />
+                  <LuTrash2 size={16} />
                 </button>
               </div>
             );

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar as CalendarIcon,
-} from "lucide-react";
+  LuChevronLeft,
+  LuChevronRight,
+  LuCalendar as CalendarIcon,
+} from "react-icons/lu";
 import { IDiary } from "../diary/page";
 
 interface DatePickerProps {
@@ -28,7 +28,7 @@ export default function DiaryDatePicker({ diary, onUpdate }: DatePickerProps) {
           containerRef.current &&
           !containerRef.current.contains(e.target as Node)
         ) {
-          toggleCalendar()
+          setIsOpen(false)
         }
       };
   
@@ -117,7 +117,7 @@ export default function DiaryDatePicker({ diary, onUpdate }: DatePickerProps) {
               onClick={handlePrevMonth}
               className="p-1 rounded-full hover:bg-muted/20 transition-colors"
             >
-              <ChevronLeft size={20} />
+              <LuChevronLeft size={20} />
             </button>
             <span className="font-semibold">
               {monthNames[month]} {year}
@@ -126,7 +126,7 @@ export default function DiaryDatePicker({ diary, onUpdate }: DatePickerProps) {
               onClick={handleNextMonth}
               className="p-1 rounded-full hover:bg-muted/20 transition-colors"
             >
-              <ChevronRight size={20} />
+              <LuChevronRight size={20} />
             </button>
           </div>
 

@@ -1,6 +1,6 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { Rocket, Target, Shield, Zap } from "lucide-react";
+import { LuRocket, LuTarget, LuShield, LuZap } from "react-icons/lu";
 import Link from "next/link";
 
 const AboutPage = () => {
@@ -22,22 +22,22 @@ const AboutPage = () => {
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {[
             {
-              icon: Rocket,
+              icon: LuRocket,
               title: "Stay Ahead",
               desc: "Track your goals and tasks with precision and speed.",
             },
             {
-              icon: Target,
+              icon: LuTarget,
               title: "Focused Mode",
               desc: "Our built-in Pomodoro timer keeps you in the flow state.",
             },
             {
-              icon: Shield,
+              icon: LuShield,
               title: "Privacy First",
               desc: "Your data is yours. We prioritize security and privacy above all.",
             },
             {
-              icon: Zap,
+              icon: LuZap,
               title: "Seamless Sync",
               desc: "Access your data from any device, anytime, anywhere.",
             },

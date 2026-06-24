@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Plus, Circle, Clock, CheckCircle2, Edit3, Trash2 } from "lucide-react";
+import { LuPlus, LuCircle, LuClock, LuCircleCheck, LuPencil, LuTrash2 } from "react-icons/lu";
 import { useDroppable } from "@dnd-kit/core";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
@@ -21,7 +21,7 @@ interface StatusConfig {
 const STATUS_CONFIG: Record<TodoStatus, StatusConfig> = {
   "not-started": {
     label: "Not started",
-    icon: <Circle className="w-3 h-3" />,
+    icon: <LuCircle className="w-3 h-3" />,
     badgeClass:
       "bg-muted text-popover dark:bg-zinc-600 dark:text-white border border-border",
     cardClass:
@@ -32,7 +32,7 @@ const STATUS_CONFIG: Record<TodoStatus, StatusConfig> = {
   },
   "in-progress": {
     label: "In progress",
-    icon: <Clock className="w-3 h-3" />,
+    icon: <LuClock className="w-3 h-3" />,
     badgeClass:
       "bg-accent text-muted-foreground dark:bg-blue-600 dark:text-white border border-primary/30",
     cardClass:
@@ -43,7 +43,7 @@ const STATUS_CONFIG: Record<TodoStatus, StatusConfig> = {
   },
   completed: {
     label: "Completed",
-    icon: <CheckCircle2 className="w-3 h-3" />,
+    icon: <LuCircleCheck className="w-3 h-3" />,
     badgeClass:
       "bg-primary text-white dark:bg-green-600 dark:text-white border border-secondary/30",
     cardClass:
@@ -133,13 +133,13 @@ function DraggableCard({
               onClick={() => setEditing(true)}
               className="p-2 text-white hover:bg-white/20 rounded-md"
             >
-              <Edit3 size={15} />
+              <LuPencil size={15} />
             </button>
             <button
               onClick={() => onDelete(todo._id!)}
               className="p-2 text-red-500 hover:bg-red-500/20 rounded-md"
             >
-              <Trash2 size={15} />
+              <LuTrash2 size={15} />
             </button>
           </div>
         )}
@@ -200,7 +200,7 @@ export function TodoContainer({
           {config.icon}
           {config.label}
         </span>
-        <span className="text-sm font-mono">{todos.length}</span>
+        <span className="text-sm font-mono">{todos?.length}</span>
       </div>
 
       {/* Drop Zone */}
@@ -211,8 +211,8 @@ export function TodoContainer({
           isOver && config.overClass,
         )}
       >
-        {todos.length !== 0 &&
-          todos.map((todo) => (
+        {todos?.length !== 0 &&
+          todos?.map((todo) => (
             <DraggableCard
               key={todo._id}
               todo={todo}
@@ -254,7 +254,7 @@ export function TodoContainer({
             config.addBtnClass,
           )}
         >
-          <Plus className="w-4 h-4" />
+          <LuPlus className="w-4 h-4" />
           <span>New page</span>
         </button>
       )}

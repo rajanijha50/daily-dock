@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Github, Instagram, Linkedin, Twitter } from "lucide-react";
+import { FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 function Footer() {
   const pages = [
     { name: "diary", href: "/diary" },
-    { name: 'timer', href: '/timer' },
+    { name: 'pomodoro', href: '/timer' },
     { name: "todos", href: "/todo" },
     { name: "notes", href: "/note" },
   ];
@@ -13,10 +14,10 @@ function Footer() {
     { name: "about", href: "/about" },
   ];
   const social = [
-    { name: 'github', href: process.env.NEXT_PUBLIC_GITHUB || 'https://github.com/', icon: Github },
-    { name: 'instagram', href: process.env.NEXT_PUBLIC_INSTAGRAM || 'https://www.instagram.com/', icon: Instagram },
-    { name: 'linkedin', href: process.env.NEXT_PUBLIC_LINKEDIN || 'https://www.linkedin.com/', icon: Linkedin },
-    { name: 'twitter', href: process.env.NEXT_PUBLIC_TWITTER || 'https://twitter.com/', icon: Twitter }
+    { name: 'github', href: process.env.NEXT_PUBLIC_GITHUB || 'https://github.com/', icon: FaGithub },
+    { name: 'instagram', href: process.env.NEXT_PUBLIC_INSTAGRAM || 'https://www.instagram.com/', icon: FaInstagram },
+    { name: 'linkedin', href: process.env.NEXT_PUBLIC_LINKEDIN || 'https://www.linkedin.com/', icon: FaLinkedin },
+    { name: 'twitter', href: process.env.NEXT_PUBLIC_TWITTER || 'https://twitter.com/', icon: FaXTwitter }
   ];
 
   return (
