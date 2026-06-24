@@ -12,9 +12,9 @@ import { GetQuote } from "./logics/quote";
 // Quote Component
 const Quote = () => {
   const [quoteText, setQuoteText] = useState<string>(
-    "The only way to do great work is to love what you do.",
+    "",
   );
-  const [quoteAuthor, setQuoteAuthor] = useState<string>("Steve Jobs");
+  const [quoteAuthor, setQuoteAuthor] = useState<string>("");
   const [quoteCategory, setQuoteCategory] = useState<string[]>();
 
   async function fetchData() {
@@ -30,13 +30,21 @@ const Quote = () => {
     fetchData();
   }, []);
   return (
-    <Card className="text-primary dark:text-foreground w-full backdrop-blur-xl bg-linear-to-br from-muted-foreground via-muted to-muted-foreground dark:from-primary-foreground dark:via-primary-foreground dark:to-secondary-foreground border-white/30 shadow-2xl overflow-hidden">
+    <Card className="text-primary dark:text-foreground w-full max-w-4xl mx-auto backdrop-blur-xl bg-linear-to-br from-muted to-card-foreground dark:from-muted dark:to-primary-foreground border-white/30 shadow-2xl overflow-hidden"> 
       <CardHeader>
         <CardTitle className="w-full text-3xl">Quote of the Day</CardTitle>
       </CardHeader>
       <CardContent className="w-full flex flex-col">
-        <span className="text-lg italic mb-2">"{quoteText}"</span>
-        <div className="text-sm text-right">— {quoteAuthor}</div>
+        {quoteText && quoteAuthor ? (
+          <>
+            <span className="text-lg italic mb-2">"{quoteText}"</span>
+            <div className="text-sm text-right">— {quoteAuthor}</div>
+          </>
+        ) : (
+          <>
+            <div className="bg-white/20 w-full h-20 rounded-2xl animate-pulse" />
+          </>
+        )}
       </CardContent>
     </Card>
   );
