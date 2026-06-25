@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { INote } from "@/app/note/page";
-import { Button } from "@/components/ui/button";
 import { LuX, LuTrash2, LuPinOff, LuPin } from "react-icons/lu";
+import { Button } from "@/components/ui/button";
+import { INote } from "@/app/note/page";
 
 interface NoteEditorProps {
   note: INote;
@@ -43,7 +43,6 @@ export default function NoteEditor({
   }, [note._id]);
 
 
-  // Auto-save
   useEffect(() => {
     const timer = setTimeout(() => {
       if (title !== note.title || content !== note.content || pinned !== note.pinned || category !== note.category) {

@@ -1,13 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { LuPlus, LuFileText, LuTrash2, LuPin, LuPinOff } from "react-icons/lu";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import NoteEditor from "../components/NoteEditor";
-import LoadingSpinner from "../components/LoadingSpinner";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import { userStore } from "../store/userStore";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import NoteEditor from "@/features/note/NoteEditor";
+import LoadingSpinner from "@/components/feedback/LoadingSpinner";
+import { userStore } from "@/store/userStore";
 
 export type INote = {
   _id?: string;
@@ -65,7 +64,7 @@ export default function NotePage() {
     }
   };
   const handleUpdateNote = async (updatedNote: INote) => {
-    setIsSaving(true)
+    setIsSaving(true);
     setNotes((prev) =>
       prev.map((n) => (n._id === updatedNote._id ? updatedNote : n)),
     );
@@ -78,7 +77,7 @@ export default function NotePage() {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
   };
   const handleDeleteNote = async (noteId: string) => {
@@ -86,7 +85,6 @@ export default function NotePage() {
       await fetch(`/api/dock/note?id=${noteId}`, { method: "DELETE" });
       setNotes((prev) => prev.filter((n) => n._id !== noteId));
       setOpenEditor(false);
-      // setActiveNote(null)
     } catch (error) {
       console.error(error);
     }
@@ -156,7 +154,11 @@ export default function NotePage() {
                           handleUpdateNote({ ...note, pinned: !note.pinned });
                         }}
                       >
-                        {note.pinned ? <LuPinOff size={20} /> : <LuPin size={20} />}
+                        {note.pinned ? (
+                          <LuPinOff size={20} />
+                        ) : (
+                          <LuPin size={20} />
+                        )}
                       </button>
                       <button
                         className="p-1.5 transition-all hover:bg-destructive/20 text-destructive rounded"

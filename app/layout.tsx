@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
+import SessionWrapper from "@/components/layout/SessionWrapper";
+import { CustomToaster } from "@/components/feedback/SendNotification";
 import { ThemeProvider } from "@/components/theme-provider";
-import SessionWrapper from "./components/SessionWrapper";
-import { CustomToaster } from "./components/SendNotification";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

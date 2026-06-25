@@ -1,4 +1,4 @@
-import { TodoType } from "@/types/database";
+import { TodoType } from "@/types/todo";
 import mongoose, { Model } from "mongoose";
 
 

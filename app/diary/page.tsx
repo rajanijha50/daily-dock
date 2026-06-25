@@ -1,10 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Header from "../components/Header";
-import DiarySidebar from "@/app/components/DiarySidebar";
-import DiaryEditor from "@/app/components/DiaryEditor";
-import Footer from "../components/Footer";
-import { userStore } from "../store/userStore";
+import { userStore } from "@/store/userStore";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import DiarySidebar from "@/features/diary/DiarySidebar";
+import DiaryEditor from "@/features/diary/DiaryEditor";
 
 export type IDiary = {
   _id?: string;
@@ -29,7 +29,6 @@ const DiaryApp = () => {
     }
   }, [user?.email]);
 
-  // Fetch Diaries
   const fetchDiaries = async () => {
     setIsLoading(true);
     try {
@@ -45,7 +44,6 @@ const DiaryApp = () => {
     }
   };
 
-  // Create New Diary
   const handleNewDiary = async () => {
     try {
       const res = await fetch("/api/dock/diary", {
@@ -67,9 +65,8 @@ const DiaryApp = () => {
     }
   };
 
-  // Update Diary
   const handleUpdateDiary = async (updatedDiary: IDiary) => {
-    setIsSaving(true)
+    setIsSaving(true);
     setDiaries((prev) =>
       prev.map((d) => (d._id === updatedDiary._id ? updatedDiary : d)),
     );
@@ -83,10 +80,9 @@ const DiaryApp = () => {
     } catch (error) {
       console.error("Failed to update diary", error);
     }
-    setIsSaving(false)
+    setIsSaving(false);
   };
 
-  // Delete Diary
   const handleDeleteDiary = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
 
@@ -119,9 +115,10 @@ const DiaryApp = () => {
         <main className="h-full flex-1 flex-col overflow-hidden">
           {selectedDiary ? (
             <DiaryEditor
-              diary={selectedDiary} 
-              onUpdate={handleUpdateDiary} 
-              isSaving={isSaving} />
+              diary={selectedDiary}
+              onUpdate={handleUpdateDiary}
+              isSaving={isSaving}
+            />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center">
               <h1 className="text-3xl font-semibold tracking-tight mb-4">

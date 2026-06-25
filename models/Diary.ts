@@ -1,4 +1,4 @@
-import { DiaryType } from "@/types/database";
+import { DiaryType } from "@/types/diary";
 import mongoose, { Model } from "mongoose";
 
 

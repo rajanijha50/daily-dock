@@ -1,11 +1,10 @@
 "use client";
 import { useState } from "react";
 import { LuPlus, LuCircle, LuClock, LuCircleCheck, LuPencil, LuTrash2 } from "react-icons/lu";
-import { useDroppable } from "@dnd-kit/core";
-import { useDraggable } from "@dnd-kit/core";
+import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
-import { ITodo } from "../todo/page";
+import { ITodo } from "@/app/todo/page";
 
 export type TodoStatus = "not-started" | "in-progress" | "completed";
 
@@ -54,7 +53,7 @@ const STATUS_CONFIG: Record<TodoStatus, StatusConfig> = {
   },
 };
 
-// ─── 1.Draggable Card ───────────────────────────────────────────────────────────
+// dragrabble card
 interface DraggableCardProps {
   cardClass: string;
   todo: ITodo;
@@ -147,8 +146,7 @@ function DraggableCard({
     );
 }
 
-// ─── 2.TodoContainer ────────────────────────────────────────────────────────────
-
+// todo container
 interface TodoContainerProps {
   status: TodoStatus;
   todos: ITodo[];

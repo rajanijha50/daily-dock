@@ -1,4 +1,4 @@
-import { UserType } from "@/types/database";
+import { UserType } from "@/types/user";
 import mongoose, { Model } from "mongoose";
 
 

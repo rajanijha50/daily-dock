@@ -5,9 +5,9 @@ import { FaXTwitter } from "react-icons/fa6";
 function Footer() {
   const pages = [
     { name: "diary", href: "/diary" },
-    { name: 'pomodoro', href: '/timer' },
     { name: "todos", href: "/todo" },
     { name: "notes", href: "/note" },
+    { name: 'pomodoro', href: '/timer' },
   ];
   const navlinks = [
     { name: "home", href: "/" },

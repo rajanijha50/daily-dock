@@ -2,11 +2,19 @@
 import { useState, useRef, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { LuMenu, LuPause, LuPlay, LuRotateCcw, LuTimer, LuX, LuFlame, LuExternalLink } from "react-icons/lu";
+import {
+  LuMenu,
+  LuPause,
+  LuPlay,
+  LuRotateCcw,
+  LuTimer,
+  LuX,
+  LuFlame,
+  LuExternalLink,
+} from "react-icons/lu";
 import { ModeToggle } from "@/components/ui/theme";
-import { timerStore } from "../store/timerStore";
-import { userStore } from "../store/userStore";
-import { useRouter } from "next/navigation";
+import { timerStore } from "@/store/timerStore";
+import { userStore } from "@/store/userStore";
 
 type UserType = {
   name?: string | null | undefined;
@@ -18,9 +26,7 @@ const UserProfile = ({ name, email, image }: UserType) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { clearUser } = userStore();
-  const router = useRouter();
 
-  
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -37,14 +43,13 @@ const UserProfile = ({ name, email, image }: UserType) => {
 
   const handleLogout = async () => {
     setIsDropdownOpen(false);
-    await signOut({redirect: false})
+    await signOut({ redirect: false });
     clearUser();
-    router.push('/');
+    window.location.href = "/";
   };
 
   return (
     <div ref={containerRef} className="relative inline-block mx-auto">
-      
       <button
         onClick={() => setIsDropdownOpen((prev) => !prev)}
         aria-expanded={isDropdownOpen}
@@ -60,7 +65,6 @@ const UserProfile = ({ name, email, image }: UserType) => {
         )}
       </button>
 
-      
       {isDropdownOpen && (
         <div
           role="menu"
@@ -221,9 +225,7 @@ const Header = () => {
     return `${year}-${month}-${day}`;
   };
 
-  const fetchUserState = async (
-    emailId: string | undefined
-  ) => {
+  const fetchUserState = async (emailId: string | undefined) => {
     if (!emailId) return;
     try {
       const updateRes = await fetch("/api/user/streak", {
@@ -249,7 +251,7 @@ const Header = () => {
 
   useEffect(() => {
     if (status === "loading") return;
- 
+
     if (session && session?.user) {
       setIsLoggedIn(true);
 
@@ -296,7 +298,6 @@ const Header = () => {
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-border animate-fade-in">
         <nav className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-15">
-            
             <Link href="/" className="group relative">
               <span className="text-2xl font-light tracking-tight transition-all duration-300 group-hover:tracking-wide">
                 Daily Dock
@@ -326,9 +327,8 @@ const Header = () => {
                 </div>
               )}
 
-              {isLoggedIn && (<TimerStatus />)}
+              {isLoggedIn && <TimerStatus />}
 
-              
               {isLoggedIn ? (
                 <UserProfile
                   name={storedUser?.name}
@@ -346,7 +346,6 @@ const Header = () => {
               <ModeToggle />
             </div>
 
-            
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="md:hidden p-2 transition-colors"

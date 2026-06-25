@@ -18,9 +18,9 @@ import {
   LuZap,
   LuMoon,
 } from "react-icons/lu";
-import { getCurrentOpenWeather } from "./logics/weather";
+import { getCurrentOpenWeather } from "./handler/weather";
 
-// Weather Component
+
 const Weather = () => {
   const [weatherData, setWeatherData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -79,7 +79,7 @@ const Weather = () => {
     const sunset = weatherData.sys.sunset;
 
     if (currentTime < sunrise || currentTime > sunset) {
-      return -1; // Night time
+      return -1;
     }
 
     const dayDuration = sunset - sunrise;
@@ -97,7 +97,6 @@ const Weather = () => {
     const sunrise = weatherData.sys.sunrise;
     const sunset = weatherData.sys.sunset;
 
-    // If it is daytime, it shouldn't show progression
     if (currentTime >= sunrise && currentTime <= sunset) {
       return 0;
     }
@@ -125,7 +124,7 @@ const Weather = () => {
   const isNight = sunPosition === -1;
   const moonPosition = isNight ? getMoonPosition() : 0;
 
-  // Get weather icon component
+  // Get weather icon
   const getWeatherIcon = (iconCode: string) => {
     const size = 80;
 
@@ -156,7 +155,6 @@ const Weather = () => {
     return <LuSun className="text-yellow-400" size={size} />;
   };
 
-  // 1. If loading, show a clean loading indicator skeleton
   if (loading) {
     return (
       <div className="w-full max-w-4xl mx-auto">
@@ -174,71 +172,12 @@ const Weather = () => {
     );
   }
 
-  // 2. If not loading and no weather data is available, do not render the component
   if (!weatherData || !weatherData.main || !weatherData.sys) {
     return null;
   }
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        @keyframes bounce-slow {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-        }
-        @keyframes shimmer {
-          0% {
-            background-position: -1000px 0;
-          }
-          100% {
-            background-position: 1000px 0;
-          }
-        }
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        .animate-bounce-slow {
-          animation: bounce-slow 2s ease-in-out infinite;
-        }
-        .animate-shimmer {
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.3),
-            transparent
-          );
-          background-size: 1000px 100%;
-          animation: shimmer 3s infinite;
-        }
-        .fade-in {
-          animation: fade-in 0.6s ease-out forwards;
-        }
-      `}</style>
-
       <Card className="text-primary dark:text-foreground w-full backdrop-blur-xl bg-linear-to-tr from-accent to-muted-foreground dark:from-muted dark:to-primary-foreground border-white/30 shadow-2xl overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" />
 

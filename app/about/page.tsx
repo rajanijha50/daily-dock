@@ -1,9 +1,20 @@
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import { LuRocket, LuTarget, LuShield, LuZap } from "react-icons/lu";
+"use client"
 import Link from "next/link";
+import { LuRocket, LuTarget, LuShield, LuZap } from "react-icons/lu";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { userStore } from "@/store/userStore";
+import { useEffect, useState } from "react";
 
 const AboutPage = () => {
+  const { user } = userStore();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+    useEffect(() => {
+      if (user.email && user.email.length > 0) {
+        setIsLoggedIn(true);
+      }
+    }, [user]);
   return (
     <div className="page-layout min-h-screen selection:bg-primary/30">
       <Header />
@@ -70,7 +81,7 @@ const AboutPage = () => {
             </p>
             <div className="flex gap-4">
               <Link
-                href={"/login"}
+                href={!isLoggedIn ? "/login" : "/"}
                 className="px-6 py-3 rounded-full bg-accent text-foreground dark:bg-foreground dark:text-primary font-semibold"
               >
                 Join the Fleet

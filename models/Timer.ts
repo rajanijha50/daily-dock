@@ -1,5 +1,5 @@
 import mongoose, { Model } from "mongoose";
-import { TimerType } from "@/types/database";
+import { TimerType } from "@/types/timer";
 
 
 const TimerSchema = new mongoose.Schema<TimerType>({

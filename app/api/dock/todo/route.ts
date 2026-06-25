@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
         }
 
         const newTodo = new TodoModel({
-            // user_id: todo.user_id, //we'll be using email to mapping between user and his TODO not userID
             user_email: todo.user_email,
             content: todo?.content,
             status: todo?.status,
@@ -108,5 +107,3 @@ export async function DELETE(request: NextRequest) {
 
 
 }
-
-// ALL GOOD✅

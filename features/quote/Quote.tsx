@@ -3,13 +3,12 @@ import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { GetQuote } from "./logics/quote";
+import { GetQuote } from "./handler/quote";
 
-// Quote Component
+
 const Quote = () => {
   const [quoteText, setQuoteText] = useState<string>(
     "",
@@ -20,7 +19,6 @@ const Quote = () => {
   async function fetchData() {
     const data = await GetQuote();
     if (data && data[0].length !== 0) {
-      // console.log(data[0]);
       setQuoteText(data[0].quote);
       setQuoteAuthor(data[0].author);
       setQuoteCategory(data[0].category);

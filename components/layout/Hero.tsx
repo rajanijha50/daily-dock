@@ -1,6 +1,6 @@
 "use client";
-import Quote from "./Quote";
-import Weather from "./Weather";
+import Quote from "@/features/quote/Quote";
+import Weather from "@/features/weather/Weather";
 
 const Hero = ({userName}: {userName: string}) => {
 

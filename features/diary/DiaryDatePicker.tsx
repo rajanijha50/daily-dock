@@ -4,7 +4,7 @@ import {
   LuChevronRight,
   LuCalendar as CalendarIcon,
 } from "react-icons/lu";
-import { IDiary } from "../diary/page";
+import { IDiary } from "@/app/diary/page";
 
 interface DatePickerProps {
   diary: IDiary;
@@ -20,21 +20,21 @@ export default function DiaryDatePicker({ diary, onUpdate }: DatePickerProps) {
   );
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  
-    // Close dropdown when clicking outside
-    useEffect(() => {
-      const handleClickOutside = (e: MouseEvent) => {
-        if (
-          containerRef.current &&
-          !containerRef.current.contains(e.target as Node)
-        ) {
-          setIsOpen(false)
-        }
-      };
-  
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+
+  // close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (diary.createdAt) {
@@ -62,13 +62,13 @@ export default function DiaryDatePicker({ diary, onUpdate }: DatePickerProps) {
 
   const toggleCalendar = () => setIsOpen(!isOpen);
 
-  // Calendar Logic
+  // calendar logic
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Sun
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
 
-  // Adjust for Monday start (Mon=0, ..., Sun=6)
+  // adjust for monday start (mon=0, ..., sun=6)
   const startDayIndex = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
   const days = [];
@@ -100,7 +100,10 @@ export default function DiaryDatePicker({ diary, onUpdate }: DatePickerProps) {
         className="flex justify-center items-center rounded-lg border text-muted px-3 py-2 shadow-sm cursor-pointer border-muted/50 hover:border-muted transition-colors"
         onClick={toggleCalendar}
       >
-        <CalendarIcon size={18} className="mr-2 text-primary dark:text-foreground" />
+        <CalendarIcon
+          size={18}
+          className="mr-2 text-primary dark:text-foreground"
+        />
         <span className="w-full text-nowrap text-primary dark:text-foreground">
           {selectedDate
             ? selectedDate.toLocaleDateString("en-IN", {

@@ -1,12 +1,13 @@
 "use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { userStore } from "@/store/userStore";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -16,6 +17,13 @@ const Register = () => {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const { user } = userStore();
+
+  useEffect(() => {
+    if (user.email && user.email.length > 0) {
+      router.push("/");
+    }
+  }, [user]);
   const handleSubmit = async () => {
     if (!name || !email || !password || !confirmPassword) {
       setError("All fields are required!");
@@ -109,21 +117,26 @@ const Register = () => {
         </FieldGroup>
         <div className="my-5 h-0.5 bg-accent dark:bg-muted"></div>
         <div className="w-full flex justify-center items-center gap-2">
-            <Button
-              className="max-w-1/2 text-foreground cursor-pointer"
-              onClick={() => signIn("google", { callbackUrl: "/" })}
-            >
-              <Image width="15" height="15" src="/google.svg" alt="google" />
-              Google
-            </Button>
+          <Button
+            className="max-w-1/2 text-foreground cursor-pointer"
+            onClick={() => signIn("google", { callbackUrl: "/" })}
+          >
+            <Image width="15" height="15" src="/google.svg" alt="google" />
+            Google
+          </Button>
 
-            <Button
-              className="max-w-1/2 text-foreground cursor-pointer"
-              onClick={() => signIn("azure-ad", { callbackUrl: "/" })}
-            >
-              <Image width="20" height="20" src="/microsoft.svg" alt="microsoft" />
-              Microsoft
-            </Button>
+          <Button
+            className="max-w-1/2 text-foreground cursor-pointer"
+            onClick={() => signIn("azure-ad", { callbackUrl: "/" })}
+          >
+            <Image
+              width="20"
+              height="20"
+              src="/microsoft.svg"
+              alt="microsoft"
+            />
+            Microsoft
+          </Button>
         </div>
         <p className="text-center text-sm mt-5">
           Already have an account?{" "}

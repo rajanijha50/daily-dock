@@ -1,11 +1,12 @@
 "use client";
-import { LuCog, LuPause, LuPlay, LuRotateCcw, LuTrash2 } from "react-icons/lu";
-import { useState, useEffect, useRef } from "react";
-import Header from "../components/Header";
-import { userStore } from "../store/userStore";
-import { timerStore } from "../store/timerStore";
-import Footer from "../components/Footer";
-import { SendNotification } from "../components/SendNotification";
+import { useState, useEffect } from "react";
+import { LuCog, LuPause, LuPlay, LuRotateCcw } from "react-icons/lu";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import TimerSettings from "@/features/timer/TimerSettings";
+import TimerHistory from "@/features/timer/TimerHistory";
+import { userStore } from "@/store/userStore";
+import { timerStore } from "@/store/timerStore";
 
 const Timer = () => {
   const {
@@ -34,7 +35,6 @@ const Timer = () => {
 
   const [showSettings, setShowSettings] = useState(false);
 
-  // Settings inputs (in minutes)
   const [configPomo, setConfigPomo] = useState(25);
   const [configBreak, setConfigBreak] = useState(5);
   const [configCycles, setConfigCycles] = useState(1);
@@ -49,24 +49,6 @@ const Timer = () => {
     };
   }, [user?.email, syncWithDB, startPolling, stopPolling]);
 
-  // useEffect(() => {
-  //    if (timeLeft === 0 && isActive) {
-  //     // Timer Finished
-  //     setIsActive(false);
-  //     handleTimerComplete()
-  //   }
-  // }, [isActive, timeLeft, updateTime, setIsActive]);
-
-  // const handleTimerComplete = () => {
-  //   setTimeout(() => {
-  //     if (mode === "pomodoro") {
-  //       setMode("break");
-  //     } else {
-  //       setMode("pomodoro");
-  //     }
-  //   }, 500);
-  // };
-
   const saveSettings = async () => {
     setPomodoroTime(configPomo * 60);
     setBreakTime(configBreak * 60);
@@ -75,7 +57,14 @@ const Timer = () => {
     setShowSettings(false);
     setIsActive(false);
     updateTime(newTime);
-    await updateTimerInDB("not-started", newTime, new Date(), null, configCycles, 1);
+    await updateTimerInDB(
+      "not-started",
+      newTime,
+      new Date(),
+      null,
+      configCycles,
+      1,
+    );
   };
 
   const formatTime = (seconds: number) => {
@@ -85,11 +74,7 @@ const Timer = () => {
   };
 
   const totalTime = mode === "pomodoro" ? pomodoroTime : breakTime;
-  // Calculate offset. Circumference = 2 * PI * r. r=140 => ~879.6
   const circumference = 2 * Math.PI * 140;
-  // Progress goes from 0 to 100%.
-  // We want the stroke to SHRINK as time passes? Or FILL?
-  // Usually clean looks like it shrinks.
   const progressRatio = timeLeft / totalTime;
   const strokeDashoffset = circumference * (1 - progressRatio);
 
@@ -208,7 +193,7 @@ const Timer = () => {
             setConfigPomo={setConfigPomo}
             configBreak={configBreak}
             setConfigBreak={setConfigBreak}
-            setConfigCycles = {setConfigCycles}
+            setConfigCycles={setConfigCycles}
             saveSettings={saveSettings}
           />
         )}
@@ -221,229 +206,8 @@ const Timer = () => {
   );
 };
 
-interface TimerSettingsProps {
-  showSettings: boolean;
-  setShowSettings: (showSettings: boolean) => void;
-  configPomo: number;
-  setConfigPomo: (configPomo: number) => void;
-  configBreak: number;
-  setConfigCycles: (configCycles: number) => void;
-  setConfigBreak: (configBreak: number) => void;
-  saveSettings: () => void;
-}
 
-const TimerSettings = ({
-  showSettings,
-  setShowSettings,
-  configPomo,
-  setConfigPomo,
-  configBreak,
-  setConfigBreak,
-  setConfigCycles,
-  saveSettings,
-}: TimerSettingsProps) => {
 
-  const [totalSession, setTotalSession] = useState(60)
-  const [numberOfCycles, setNumberOfCycles] = useState(Math.round(totalSession/(configPomo+configBreak)))
 
-  useEffect(()=>{
-    setNumberOfCycles(Math.round(totalSession/(configPomo+configBreak)) || 0)
-    setConfigCycles(Math.round(totalSession/(configPomo+configBreak)))
-  },[totalSession, configPomo, configBreak])
-
-  function ValidateAndSaveSettings(){
-    if (configPomo <= 0 || configBreak <= 0){
-      SendNotification("Focus and break durations must be greater than 0.", "error")
-      return
-    }
-    if (configBreak > configPomo){
-      SendNotification("Break duration must be less than focus duration.", "error")
-      return
-    }
-    if ((configPomo + configBreak) > totalSession){
-      SendNotification("Total session duration must be greater than sum of focus and break durations.", "error")
-      setTotalSession(configPomo + configBreak)
-      return
-    }
-    saveSettings()
-  }
-
-  return (
-    <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
-      <div className="backdrop-blur-lg border border-border p-8 rounded-3xl shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
-        <h2 className="text-2xl font-bold mb-6">Timer Settings</h2>
-        <div className="mb-4">
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-2">
-            Total Session Duration (min)
-          </label>
-          <input
-            type="number"
-            value={totalSession}
-            onFocus={(e) => e.target.setSelectionRange(0, e.target.value.length)}
-            onChange={(e) => setTotalSession(Number(e.target.value))}
-            className="w-full bg-primary/70 border border-muted focus:border-secondary focus:ring-1 focus:ring-secondary outline-none p-3 rounded-xl text-white font-mono text-lg transition-all"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-2">
-            Focus Duration (min)
-          </label>
-          <input
-            type="number"
-            value={configPomo}
-            onFocus={(e) => e.target.setSelectionRange(0, e.target.value.length)}
-            onChange={(e) => setConfigPomo(Number(e.target.value))}
-            className="w-full bg-primary/70 border border-muted focus:border-secondary focus:ring-1 focus:ring-secondary outline-none p-3 rounded-xl text-white font-mono text-lg transition-all"
-          />
-        </div>
-        <div className="mb-8">
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-2">
-            Break Duration (min)
-          </label>
-          <input
-            type="number"
-            value={configBreak}
-            onFocus={(e) => e.target.setSelectionRange(0, e.target.value.length)}
-            onChange={(e) => setConfigBreak(Number(e.target.value))}
-            className="w-full bg-primary/70 border border-muted focus:border-secondary focus:ring-1 focus:ring-secondary outline-none p-3 rounded-xl text-white font-mono text-lg transition-all"
-          />
-        </div>
-        <div className="flex justify-center items-center mb-8">
-          <p className="text-sm font-semibold uppercase tracking-wider">Total Cycles: {numberOfCycles}</p>
-        </div>
-        <div className="flex justify-end space-x-3">
-          <button
-            onClick={() => setShowSettings(false)}
-            className="px-5 py-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-muted transition-colors font-medium"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={ValidateAndSaveSettings}
-            className="px-5 py-2 rounded-xl bg-secondary hover:bg-primary text-white font-bold shadow-lg shadow-blue-900/20 transition-all hover:translate-y-px"
-          >
-            Save Changes
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-interface TimerHistoryProps {
-  email: string | undefined;
-}
-
-const TimerHistory = ({ email }: TimerHistoryProps) => {
-  const [history, setHistory] = useState<any[]>([]);
-
-  const fetchHistory = async () => {
-    if (!email) return;
-    try {
-      const res = await fetch(
-        `/api/dock/timer/history?user_email=${encodeURIComponent(email)}`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setHistory(data);
-        } else {
-          setHistory([]);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch timer history:", error);
-    }
-  };
-
-  const deleteHistoryItem = async (id: string) => {
-    if (!email) return;
-    try {
-      const res = await fetch("/api/dock/timer/history", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_email: email, timer_id: id }),
-      });
-      if (res.ok) {
-        setHistory((prev) => prev.filter((item) => item._id !== id));
-      }
-    } catch (error) {
-      console.error("Failed to delete timer history item:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchHistory();
-    const interval = setInterval(fetchHistory, 5000);
-    return () => clearInterval(interval);
-  }, [email]);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
-
-  if (!email) return null;
-
-  return (
-    <div className="w-full max-w-xl px-6 py-6 mt-8 rounded-3xl border border-border/40 shadow-2xl transition-all duration-300">
-      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-        Timer History
-      </h2>
-
-      {history.length === 0 ? (
-        <div className="text-center py-8 text-sm">
-          No timers in history yet. Start a timer to see it here!
-        </div>
-      ) : (
-        <div className="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
-          {history.map((item) => {
-            const dateStr = new Date(
-              item.createdAt || item.started_at,
-            ).toLocaleString(undefined, {
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-
-            return (
-              <div
-                key={item._id}
-                className="flex items-center justify-between p-3.5 rounded-2xl border border-transparent hover:border-border/30 transition-all duration-300 group bg-secondary/50"
-              >
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm font-semibold tracking-tight">
-                      {formatTime(item.duration)}
-                    </span>
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-white/20 text-white`}
-                    >
-                      {item.status}
-                    </span>
-                  </div>
-                  <span className="text-[11px]">
-                    {dateStr} • {item.maxCycles || 1} {item.maxCycles === 1 ? 'cycle' : 'cycles'}
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => deleteHistoryItem(item._id)}
-                  className="p-2 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200"
-                  title="Delete from history"
-                >
-                  <LuTrash2 size={16} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
 
 export default Timer;

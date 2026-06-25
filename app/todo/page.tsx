@@ -9,11 +9,11 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { TodoContainer, TodoStatus } from "../components/TodoContainer";
-import Header from "../components/Header";
-import LoadingSpinner from "../components/LoadingSpinner";
-import Footer from "../components/Footer";
-import { userStore } from "../store/userStore";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import LoadingSpinner from "@/components/feedback/LoadingSpinner";
+import { TodoContainer, TodoStatus } from "@/features/todo/TodoContainer";
+import { userStore } from "@/store/userStore";
 
 export type ITodo = {
   _id?: string;
@@ -23,28 +23,23 @@ export type ITodo = {
   modifiedAt?: Date;
 };
 
-
 const COLUMNS: TodoStatus[] = ["not-started", "in-progress", "completed"];
 
 export default function TodoPage() {
   const [todos, setTodos] = useState<ITodo[]>([]);
   const [activeTodo, setActiveTodo] = useState<ITodo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const {user} = userStore()
+  const { user } = userStore();
 
-  // Fetch Todos
   useEffect(() => {
     if (user?.email) {
       fetchTodos();
     }
   }, [user?.email]);
 
-  // NOTE: CRUD Operations
   const fetchTodos = async () => {
     try {
-      const res = await fetch(
-        `/api/dock/todo?user_email=${user?.email}`,
-      );
+      const res = await fetch(`/api/dock/todo?user_email=${user?.email}`);
       const data = await res.json();
       if (res.ok) {
         setTodos(data.data);
@@ -93,7 +88,6 @@ export default function TodoPage() {
     try {
       await fetch(`/api/dock/todo?id=${todoId}`, { method: "DELETE" });
       setTodos((prev) => prev.filter((t) => t._id !== todoId));
-      // setActiveNote(null)
     } catch (error) {
       console.error(error);
     }
@@ -118,17 +112,10 @@ export default function TodoPage() {
 
     const draggedId = active.id as string;
     const targetStatus = over.id as TodoStatus;
-
-    // setTodos((prev) =>
-    //   prev.map((todo) =>
-    //     todo._id === draggedId ? { ...todo, status: targetStatus } : todo,
-    //   ),
-    // );
     const draggedTodo = todos.find((todo) => todo._id === draggedId);
     handleUpdateTodo({ ...draggedTodo, status: targetStatus });
   };
   const handleDragCancel = () => setActiveTodo(null);
-
 
   const filterTodoByStatus = (status: TodoStatus) =>
     todos?.filter((t) => t.status === status);
@@ -141,9 +128,7 @@ export default function TodoPage() {
           {/* Page Header */}
           <div className="mb-8">
             <h1 className="text-2xl font-semibold tracking-tight">My Todos</h1>
-            <p className="text-sm mt-1">
-              Track your progress by making todos.
-            </p>
+            <p className="text-sm mt-1">Track your progress by making todos.</p>
           </div>
 
           {/* Kanban Board */}
@@ -187,7 +172,7 @@ export default function TodoPage() {
           </DndContext>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 }

@@ -27,15 +27,11 @@ export async function PUT(req: Request) {
         
         // Normalize to YYYY-MM-DD to ignore time part
         const today = new Date(dateToUse.getFullYear(), dateToUse.getMonth(), dateToUse.getDate());
-        // console.log(today)
         
         const lastLoginVal = user.lastLogin;
         
         if (!lastLoginVal) {
-            // Should not happen with default: Date.now, but good for safety
             user.currentStreak = 1;
-            // user.lastLogin = today;
-            // await user.save();
         } else {
             const lastLogin = new Date(lastLoginVal.getFullYear(), lastLoginVal.getMonth(), lastLoginVal.getDate());
             

@@ -9,10 +9,10 @@ import {
   LuTrash2,
   LuX,
 } from "react-icons/lu";
-import LoadingSpinner from "./LoadingSpinner";
-import { IDiary } from "../diary/page";
-import { userStore } from "../store/userStore";
-import { SendNotification } from "./SendNotification";
+import LoadingSpinner from "@/components/feedback/LoadingSpinner";
+import { SendNotification } from "@/components/feedback/SendNotification";
+import { IDiary } from "@/app/diary/page";
+import { userStore } from "@/store/userStore";
 
 interface SidebarProps {
   isLoading: Boolean;
@@ -135,7 +135,7 @@ const DiarySidebar: React.FC<SidebarProps> = ({
   return (
     <div
       id="diary_H"
-      className="w-80 h-full flex flex-col border-r border-(--muted)/50 transition-all duration-300 ease-in-out"
+      className="sidebar-animation w-80 h-full flex flex-col border-r border-(--muted)/50 transition-all duration-300 ease-in-out"
     >
       <div className="p-4 border-b-2 border-(--muted)/50 flex justify-between items-center">
         <h2 className="text-2xl font-bold">My Diaries</h2>
@@ -220,7 +220,6 @@ const DiarySidebar: React.FC<SidebarProps> = ({
                 <div
                   key={diary._id}
                   id={`H-${diary._id}`}
-                  // onClick={() => onSelect(diary._id!)}
                   onClick={(e) => handleDiaryChange(e, selectedId, diary._id!)}
                   className={`bg-(--muted)/10 p-3 mb-2 rounded-lg cursor-pointer transition-all hover:bg-(--muted)/15 group flex justify-between items-center ${
                     selectedId == diary._id
@@ -246,7 +245,11 @@ const DiarySidebar: React.FC<SidebarProps> = ({
                     className="opacity-0 group-hover:opacity-100 p-1.5 transition-all hover:bg-white/20 rounded"
                     title={diary.pinned ? "Unpin" : "Pin"}
                   >
-                    {diary.pinned ? <LuPinOff size={20} /> : <LuPin size={20} />}
+                    {diary.pinned ? (
+                      <LuPinOff size={20} />
+                    ) : (
+                      <LuPin size={20} />
+                    )}
                   </button>
                   <button
                     onClick={(e) => {

@@ -1,4 +1,4 @@
-import { NoteType } from "@/types/database";
+import { NoteType } from "@/types/note";
 import mongoose, { Model } from "mongoose";
 
 

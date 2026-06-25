@@ -1,12 +1,13 @@
 "use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { userStore } from "@/store/userStore";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,11 +15,19 @@ const Login = () => {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const { user } = userStore();
+
+  useEffect(() => {
+    if (user.email && user.email.length > 0) {
+      router.push("/");
+    }
+  }, [user]);
+
   const handleSubmit = async () => {
     if (!email || !password) {
       setError("All fields are required!");
       setTimeout(() => {
-        setError('')
+        setError("");
       }, 3000);
       return;
     }
@@ -96,7 +105,12 @@ const Login = () => {
               className="text-foreground cursor-pointer"
               onClick={() => signIn("azure-ad", { callbackUrl: "/" })}
             >
-              <Image width="20" height="20" src="/microsoft.svg" alt="microsoft" />
+              <Image
+                width="20"
+                height="20"
+                src="/microsoft.svg"
+                alt="microsoft"
+              />
               Login with Microsoft
             </Button>
           </Field>
