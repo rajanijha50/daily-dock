@@ -1,7 +1,4 @@
-// import { rejects } from "assert";
 import mongoose from "mongoose";
-
-
 
 export default async function connectDB(){
     try{

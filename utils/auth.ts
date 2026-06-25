@@ -16,6 +16,11 @@ export const AuthOptions: NextAuthOptions = {
       clientId: process.env.AZURE_AD_CLIENT_ID!,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
       tenantId: process.env.AZURE_AD_TENANT_ID!,
+      authorization: {
+        params: {
+          scope: "openid profile email User.Read",
+        },
+      },
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -67,11 +72,6 @@ export const AuthOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      // console.log("DETAILS: ", {
-      //   user: user,
-      //   account: account,
-      //   profile: profile,
-      // });
       if (account?.provider === "google" || account?.provider === "azure-ad") {
         try {
           await connectDB();
@@ -80,37 +80,58 @@ export const AuthOptions: NextAuthOptions = {
             (profile as any)?.email ||
             (profile as any)?.preferred_username;
 
-          let avatarURL = null;
+          let avatarURL: string | null = null;
           if (account.provider === "azure-ad") {
             if (account.access_token) {
-              const photoRes = await fetch(
+              // Try multiple endpoints — personal accounts (outlook.com/live.com)
+              // return 404 on the base endpoint if no photo is set.
+              const photoEndpoints = [
                 "https://graph.microsoft.com/v1.0/me/photo/$value",
-                {
-                  headers: { Authorization: `Bearer ${account.access_token}` },
-                },
-              );
+                "https://graph.microsoft.com/v1.0/me/photos/96x96/$value",
+                "https://graph.microsoft.com/v1.0/me/photos/48x48/$value",
+              ];
 
-              if (photoRes.ok) {
-                const buffer = await photoRes.arrayBuffer();
+              let successRes: Response | null = null;
+              for (const endpoint of photoEndpoints) {
+                try {
+                  const res = await fetch(endpoint, {
+                    headers: { Authorization: `Bearer ${account.access_token}` },
+                  });
+                  if (res.ok) {
+                    successRes = res;
+                    break;
+                  }
+                } catch (fetchErr) {
+                  console.warn(`Photo fetch failed for ${endpoint}:`, fetchErr);
+                }
+              }
+
+              if (successRes) {
+                const buffer = await successRes.arrayBuffer();
                 const base64 = Buffer.from(buffer).toString("base64");
-                const mimeType =
-                  photoRes.headers.get("content-type") || "image/jpeg";
+                const mimeType = successRes.headers.get("content-type") || "image/jpeg";
                 avatarURL = `data:${mimeType};base64,${base64}`;
-                // Or upload this buffer to S3/Cloudinary and store the URL instead
+              } else {
+                // Fallback: NextAuth may populate user.image from the token's picture claim
+                avatarURL = user.image ?? null;
               }
             }
           } else {
-            avatarURL = user.image;
+            avatarURL = user.image ?? null;
           }
-          const existing = await UserModel.findOne({ email: user.email });
-          if (!existing) {
-            const newUser = new UserModel({
-              name: user.name || profile?.name || user.email?.split("@")[0],
-              email: email,
-              avatar: avatarURL,
-            });
-            await newUser.save();
-          }
+
+          // Upsert: create new user or update avatar for existing users
+          await UserModel.findOneAndUpdate(
+            { email: email },
+            {
+              $setOnInsert: {
+                name: user.name || profile?.name || email?.split("@")[0],
+                email: email,
+              },
+              ...(avatarURL ? { $set: { avatar: avatarURL } } : {}),
+            },
+            { upsert: true, new: true },
+          );
         } catch (error) {
           console.error("OAuth user creation error:", error);
           return false;
